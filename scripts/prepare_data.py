@@ -77,11 +77,15 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if args.command == "ingest":
             from fintrace.ingestion.ibm import ingest_ibm
+            import duckdb
             def progress(counts):
                 if counts["source_records"] % 250000 == 0:
                     print(json.dumps({"progress": counts}), file=sys.stderr, flush=True)
-            result = ingest_ibm(args.manifest, raw_root, args.processed_root,
-                                batch_size=args.batch_size, progress=progress)
+            try:
+                result = ingest_ibm(args.manifest, raw_root, args.processed_root,
+                                    batch_size=args.batch_size, progress=progress)
+            except duckdb.Error as error:
+                raise ManifestError(f"Dataset summary could not complete: {error}") from error
             print(json.dumps(result, indent=2))
             return 0
         if args.command == "create":
@@ -102,6 +106,10 @@ def main(argv: list[str] | None = None) -> int:
             manifest = verify_manifest(args.manifest, raw_root)
             destination = args.manifest.resolve(strict=True)
             status = "verified"
+    except ImportError as error:
+        print(f"Data dependency unavailable: {error}. Install config/data-requirements.txt in the virtual environment.",
+              file=sys.stderr)
+        return 2
     except (ManifestError, OSError, ValueError, csv.Error) as error:
         print(f"Data preparation failed: {error}", file=sys.stderr)
         return 2

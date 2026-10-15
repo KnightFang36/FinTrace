@@ -57,6 +57,16 @@ class PrepareDataCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertFalse((self.raw / "manifest.json").exists())
 
+    def test_ingestion_without_optional_dependencies_has_actionable_error(self):
+        self.assertEqual(self.run_cli(self.create_args).returncode, 0)
+        result = subprocess.run([
+            sys.executable, "-S", str(ROOT / "scripts/prepare_data.py"),
+            "--raw-root", str(self.raw), "ingest", str(self.raw / "manifest.json"),
+        ], capture_output=True, text=True, check=False)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("config/data-requirements.txt", result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()
