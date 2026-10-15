@@ -83,7 +83,7 @@ def evaluate_rules(transactions, history=None, *, policy, cutoff, context=None) 
             status, reasons, work = "disabled", ("policy_disabled",), {}
         elif rule not in CORE_RULES:
             status, reasons, work = "unavailable", (
-                "graph_phase_pending" if rule in ("layering", "circular_flow", "coordinated_group")
+                "separate_graph_analysis_required" if rule in ("layering", "circular_flow", "coordinated_group")
                 else "verified_context_service_pending",
             ), {}
         elif rule in ("burst", "dormant_activation") and not context.get("observation_intervals"):

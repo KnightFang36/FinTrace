@@ -22,7 +22,7 @@ def _hash(path):
     return digest.hexdigest()
 
 
-def run_rule_snapshot(transactions_path, policy_path, cutoff, output_root, *, subject_accounts=()):
+def load_detection_snapshot(transactions_path, cutoff, *, start=None, max_records, subject_accounts=()):
     """Run one explicit cutoff, never opening labels or pattern annotations."""
     import pyarrow as pa
     import pyarrow.dataset as ds
@@ -55,23 +55,14 @@ def run_rule_snapshot(transactions_path, policy_path, cutoff, output_root, *, su
         raise ValueError("Invalid dataset quality metadata")
     if quality["dataset_id"] != completion["dataset_id"]:
         raise ValueError("Conflicting input dataset identities")
-    policy = load_policy(policy_path)
     cutoff = utc_instant(cutoff)
     subjects = tuple(sorted(set(
         item if isinstance(item, AccountKey) else AccountKey(**item) for item in subject_accounts
     )))
-    active_width = max(
-        (policy[rule].get("active_window_minutes", policy[rule].get("window_minutes", 0))
-         for rule in CORE_RULES if policy.get(rule, {}).get("enabled")), default=0,
-    )
-    history_required = (
-        bool(quality["observation_intervals"])
-        and any(policy.get(rule, {}).get("enabled") for rule in ("burst", "dormant_activation"))
-    )
     expression = ds.field("occurred_at") < pa.scalar(cutoff, type=pa.timestamp("us", tz="UTC"))
-    if not history_required:
+    if start is not None:
         expression = expression & (
-            ds.field("occurred_at") >= pa.scalar(cutoff - timedelta(minutes=active_width),
+            ds.field("occurred_at") >= pa.scalar(utc_instant(start),
                                                 type=pa.timestamp("us", tz="UTC"))
         )
     if subjects:
@@ -84,7 +75,7 @@ def run_rule_snapshot(transactions_path, policy_path, cutoff, output_root, *, su
             account_filter = item if account_filter is None else account_filter | item
         expression = expression & account_filter
     rows = []
-    limit = execution_limits(policy)["max_input_transactions"]
+    limit = max_records
     scanner = ds.dataset(path, format="parquet").scanner(
         columns=list(TRANSACTION_FIELDS), filter=expression, batch_size=16384,
     )
@@ -99,6 +90,32 @@ def run_rule_snapshot(transactions_path, policy_path, cutoff, output_root, *, su
         "timezone_policy_basis": quality.get("timestamp_policy_basis", "user_declared"),
         "timestamp_precision": quality["timestamp_precision"],
     }
+    return rows, context, hashes
+
+
+def run_rule_snapshot(transactions_path, policy_path, cutoff, output_root, *, subject_accounts=()):
+    """Run one explicit cutoff, never opening labels or pattern annotations."""
+    policy = load_policy(policy_path)
+    cutoff = utc_instant(cutoff)
+    active_width = max(
+        (policy[rule].get("active_window_minutes", policy[rule].get("window_minutes", 0))
+         for rule in CORE_RULES if policy.get(rule, {}).get("enabled")), default=0,
+    )
+    # Read verified metadata in the loader, then choose the bounded active prefix
+    # unless complete observation intervals require historical records.
+    rows, context, hashes = load_detection_snapshot(
+        transactions_path, cutoff, start=cutoff - timedelta(minutes=active_width),
+        max_records=execution_limits(policy)["max_input_transactions"], subject_accounts=subject_accounts,
+    )
+    if context["observation_intervals"] and any(
+        policy.get(rule, {}).get("enabled") for rule in ("burst", "dormant_activation")
+    ):
+        rows, context, hashes = load_detection_snapshot(
+            transactions_path, cutoff, max_records=execution_limits(policy)["max_input_transactions"],
+            subject_accounts=subject_accounts,
+        )
+    parent = Path(transactions_path).parent
+    quality = json.loads((parent / "quality.json").read_text())
     result = evaluate_rules(rows, policy=policy, cutoff=cutoff, context=context)
     # Detect a source change during scanning before publishing any finding artifacts.
     for name, expected in hashes.items():
