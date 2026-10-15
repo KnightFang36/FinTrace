@@ -161,3 +161,47 @@ class RuleResult:
 
     def to_dict(self) -> dict:
         return json_value(self)
+
+
+def parse_finding(value) -> Finding:
+    """Validate the public evidence boundary without accepting arbitrary enrichment fields."""
+    from dataclasses import fields
+
+    if isinstance(value, Finding):
+        value = asdict(value)
+    if not isinstance(value, Mapping) or set(value) != {item.name for item in fields(Finding)}:
+        raise ValueError("Expected the exact label-free Finding schema")
+    data = dict(value)
+    for name in ("finding_id", "rule_id", "rule_version", "dataset_id", "explanation"):
+        if not isinstance(data[name], str) or not data[name].strip():
+            raise ValueError(f"Finding {name} must be non-empty text")
+    if not isinstance(data["subject_accounts"], (tuple, list)) or not isinstance(data["subject_roles"], (tuple, list)):
+        raise ValueError("Finding subjects and roles must be sequences")
+    data["subject_accounts"] = tuple(
+        item if isinstance(item, AccountKey) else AccountKey(**item) for item in data["subject_accounts"]
+    )
+    data["subject_roles"] = tuple(data["subject_roles"])
+    if (not data["subject_accounts"] or len(set(data["subject_accounts"])) != len(data["subject_accounts"])
+            or len(data["subject_accounts"]) != len(data["subject_roles"])
+            or any(not isinstance(role, str) or not role for role in data["subject_roles"])):
+        raise ValueError("Finding subjects require distinct accounts and explicit matching roles")
+    for name in ("window_start", "window_end", "cutoff"):
+        data[name] = utc_instant(data[name])
+    if not data["window_start"] < data["window_end"] <= data["cutoff"]:
+        raise ValueError("Invalid finding window/cutoff")
+    ids = data["transaction_ids"]
+    if (not isinstance(ids, (tuple, list)) or not ids or len(set(ids)) != len(ids)
+            or any(not isinstance(item, str) or not item for item in ids)):
+        raise ValueError("Finding evidence requires distinct non-empty transaction IDs")
+    data["transaction_ids"] = tuple(ids)
+    if not isinstance(data["measurements"], dict) or not isinstance(data["thresholds"], dict):
+        raise ValueError("Finding measurements and thresholds must be mappings")
+    if data["currency"] is not None and (not isinstance(data["currency"], str) or not data["currency"]):
+        raise ValueError("Invalid finding currency")
+    if not isinstance(data["limitations"], (tuple, list)) or any(not isinstance(item, str) for item in data["limitations"]):
+        raise ValueError("Finding limitations must be text entries")
+    data["limitations"] = tuple(data["limitations"])
+    if data["coverage_status"] not in ("evaluated", "truncated"):
+        raise ValueError("Only evidence-backed evaluated/truncated findings are eligible")
+    canonical_json(data)
+    return Finding(**data)

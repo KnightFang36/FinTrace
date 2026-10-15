@@ -1,7 +1,7 @@
 # Alert generation and lifecycle contract instructions
 
 ## Purpose
-Maintain the authoritative contract in `README.md` for `src/fintrace/alerts/`. Implementation is pending.
+Maintain the authoritative contract in `README.md` for `src/fintrace/alerts/`. Local alert grouping, verified imports, audited transitions and transactional persistence are implemented.
 
 ## Inputs
 - Findings, priority snapshots, explicit grouping policy and persisted alert history.

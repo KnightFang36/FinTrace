@@ -1,7 +1,7 @@
 # Alert generation and lifecycle implementation instructions
 
 ## Purpose
-Own the source service described in `docs/features/alerts/README.md`. Modules are placeholders until implemented.
+Own the source service described in `docs/features/alerts/README.md`. engine.py and runner.py implement local review incidents, verified imports and audited lifecycle; cases/UI remain pending.
 
 ## Inputs
 - Findings, priority snapshots, explicit grouping policy and persisted alert history.
@@ -22,3 +22,5 @@ Own the source service described in `docs/features/alerts/README.md`. Modules ar
 
 ## Implementation constraints
 Follow root invariants and shared records. Implement the feature contract's failure cases and acceptance examples. Keep labels out of this service entirely. Persist source evidence and explicit coverage; do not conceal insufficient input as no suspicious activity. Do not add business logic to the dashboard. Update docs and relevant tests with implementation.
+
+runner.py consumes checksum-verified rule and optional graph run directories sharing dataset/cutoff/input identity. Alert incident buckets align to the epoch and contain the last instant of the finding analysis window. Closed alerts retain new evidence without implicit reopening. Audit actor/time are explicit; every transition needs reason and expected version.

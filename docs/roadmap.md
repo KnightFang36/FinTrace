@@ -1,6 +1,6 @@
 # Implementation roadmap
 
-Data preparation and phase-2 deterministic transaction rules are implemented. Six core rules produce traceable evidence and explicit feature coverage through a bounded cutoff-snapshot CLI. General workflow/case persistence remains a later service. Phase 3 temporal NetworkX analysis is implemented with a separate verified snapshot CLI and bounded PNG views. Phase 4 priority and alerts is next.
+Data preparation and phase-2 deterministic transaction rules are implemented. Six core rules produce traceable evidence and explicit feature coverage through a bounded cutoff-snapshot CLI. General workflow/case persistence remains a later service. Phase 3 temporal NetworkX analysis is implemented with a separate verified snapshot CLI and bounded PNG views. Phase 4 fixed-policy priority and transactional audited alerts is also implemented. Phase 5 investigation and case services is next.
 
 | Phase | Deliverables | Completion evidence |
 | --- | --- | --- |

@@ -1,1 +1,1 @@
-"""storage: planned FinTrace service package; implementation pending."""
+"""Local alert persistence is implemented; general case/replay repositories remain pending."""

@@ -16,3 +16,5 @@ contracts.py defines exact account/transaction records, findings, feature covera
 Do not expose placeholder APIs as working. Ingestion may extract benchmark labels into a separate evaluation artifact; evaluation alone may consume that artifact. All detection and investigation services remain label-free. No floating-point money, implicit timezones, hidden currency conversion or unsupported exact-provenance claims.
 
 Graph engine owns chronological evidence; graph runner reuses the verified detection snapshot loader without account-edge filtering. Explicit seeds restrict path origins only. Optional reference exposure remains pending.
+
+scoring/priority.py owns fixed-family contributions. alerts/engine.py owns stable incidents and explicit lifecycle actions; alerts/runner.py verifies compatible frozen detector outputs. storage/alert_store.py transactionally retains immutable evidence/priority snapshots and append-only audit. General case persistence remains pending.

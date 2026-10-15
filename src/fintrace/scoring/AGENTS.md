@@ -1,7 +1,7 @@
 # Explainable priority scoring implementation instructions
 
 ## Purpose
-Own the source service described in `docs/features/priority_scoring/README.md`. Modules are placeholders until implemented.
+Own the source service described in `docs/features/priority_scoring/README.md`. priority.py is implemented with strict policy, subject-role and snapshot integrity validation.
 
 ## Inputs
 - Evidence-backed findings with subject roles and versioned fixed scoring policy.
@@ -22,3 +22,5 @@ Own the source service described in `docs/features/priority_scoring/README.md`. 
 
 ## Implementation constraints
 Follow root invariants and shared records. Implement the feature contract's failure cases and acceptance examples. Keep labels out of this service entirely. Persist source evidence and explicit coverage; do not conceal insufficient input as no suspicious activity. Do not add business logic to the dashboard. Update docs and relevant tests with implementation.
+
+Implemented output IDs include complete policy hashes, coverage and contribution ledgers. Unknown rules/roles, mixed dataset/cutoff windows and altered contribution arithmetic fail. Families select the smallest eligible finding ID as their deterministic representative.
