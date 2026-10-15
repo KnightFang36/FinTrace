@@ -1,0 +1,24 @@
+# Demonstration graph policy; no legal or criminal-intent inference.
+schema_version = "1"
+policy_version = "graph-demo-v1"
+window_minutes = 180
+minimum_hops = 3
+maximum_hops = 4
+minimum_cycle_length = 2
+maximum_cycle_length = 5
+max_input_transactions = 250000
+max_nodes = 100000
+max_seed_accounts = 20
+max_expansions = 100000
+max_findings_per_feature = 1000
+max_search_seconds = 10
+context_max_nodes = 2000
+context_max_edges = 10000
+betweenness_samples = 32
+layout_seed = 42
+max_display_nodes = 100
+max_display_edges = 200
+coordination_window_minutes = 60
+coordination_bucket_minutes = 1
+coordination_minimum_accounts = 3
+coordination_repeated_windows = 2
