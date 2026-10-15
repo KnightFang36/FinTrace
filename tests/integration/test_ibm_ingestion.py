@@ -118,3 +118,13 @@ class IbmIngestionTests(unittest.TestCase):
         (self.processed / "datasets").symlink_to(self.raw, target_is_directory=True)
         with self.assertRaisesRegex(ManifestError, "symbolic"):
             ingest_ibm(self.manifest, self.raw, self.processed)
+
+    def test_account_summary_keeps_distinct_currencies_and_endpoint_roles(self):
+        reverse = "2022/09/01 00:01,001,000B,010,000A,0.50,Euro,1.20,US Dollar,ACH,0"
+        self.prepare([self.normal(), self.normal(), reverse])
+        ingest_ibm(self.manifest, self.raw, self.processed)
+        accounts = pq.read_table(self.dataset / "accounts.parquet").to_pylist()
+        account = next(row for row in accounts if row["bank_id"] == "010")
+        self.assertEqual(account["observed_currencies"], ["Bitcoin", "Euro"])
+        self.assertEqual(account["source_endpoint_roles"], ["receiver", "sender"])
+        self.assertEqual(account["dataset_id"], accounts[0]["dataset_id"])

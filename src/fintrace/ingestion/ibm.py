@@ -54,32 +54,36 @@ def _schemas():
     }
 
 
-def _derive_accounts_and_diagnostics(transaction_path: Path, accounts_path: Path, scratch: Path) -> dict:
+def _derive_accounts_and_diagnostics(transaction_path: Path, accounts_path: Path, scratch: Path,
+                                     metadata: dict) -> dict:
     import duckdb
     connection = duckdb.connect()
     try:
         connection.execute("SET memory_limit='512MB'")
-        connection.execute("SET threads=2")
+        connection.execute("SET threads=1")
+        connection.execute("SET preserve_insertion_order=false")
         connection.execute("SET temp_directory=?", [str(scratch)])
         # Detection-only Parquet is the sole input: no benchmark labels are queried.
         query = """
             WITH endpoints AS (
-                SELECT schema_version, run_id, dataset_id, sender_bank_id AS bank_id,
+                SELECT sender_bank_id AS bank_id,
                     sender_account_id AS account_id, occurred_at, payment_currency AS currency,
                     'sender' AS role FROM read_parquet(?)
                 UNION ALL
-                SELECT schema_version, run_id, dataset_id, receiver_bank_id AS bank_id,
+                SELECT receiver_bank_id AS bank_id,
                     receiver_account_id AS account_id, occurred_at, receiving_currency AS currency,
                     'receiver' AS role FROM read_parquet(?)
             )
-            SELECT schema_version, run_id, dataset_id, bank_id, account_id,
+            SELECT '1' AS schema_version, ? AS run_id, ? AS dataset_id, bank_id, account_id,
                 min(occurred_at) AS first_observed_at, max(occurred_at) AS last_observed_at,
-                list_sort(list_distinct(list(currency))) AS observed_currencies,
-                list_sort(list_distinct(list(role))) AS source_endpoint_roles
-            FROM endpoints GROUP BY schema_version, run_id, dataset_id, bank_id, account_id
+                list_sort(list(DISTINCT currency)) AS observed_currencies,
+                CASE WHEN bool_or(role='sender') AND bool_or(role='receiver') THEN ['receiver','sender']
+                     WHEN bool_or(role='sender') THEN ['sender'] ELSE ['receiver'] END AS source_endpoint_roles
+            FROM endpoints GROUP BY bank_id, account_id
             ORDER BY bank_id, account_id
         """
-        relation = connection.sql(query, params=[str(transaction_path), str(transaction_path)])
+        relation = connection.sql(query, params=[str(transaction_path), str(transaction_path),
+                                                 metadata["run_id"], metadata["dataset_id"]])
         relation.write_parquet(str(accounts_path), compression="zstd")
         duplicate_rows = connection.execute("""
             SELECT coalesce(sum(n - 1), 0) FROM (
@@ -258,7 +262,7 @@ def ingest_ibm(
                             progress(dict(counts))
                 flush()
         diagnostics = _derive_accounts_and_diagnostics(
-            paths["transactions"], detection_stage / "accounts.parquet", stage / "scratch",
+            paths["transactions"], detection_stage / "accounts.parquet", stage / "scratch", common,
         )
         verify_manifest(manifest_path, raw_root)
         quality = {
