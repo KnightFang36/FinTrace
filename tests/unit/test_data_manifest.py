@@ -166,6 +166,21 @@ class DataManifestTests(unittest.TestCase):
         with self.assertRaisesRegex(ManifestError, "positive integer"):
             validate_manifest(manifest)
 
+    def test_unknown_acquisition_is_recorded_without_fabrication_in_v2(self):
+        manifest = self.manifest(acquired_at=None)
+        self.assertEqual(manifest["schema_version"], "2")
+        self.assertIsNone(manifest["acquired_at"])
+        self.assertEqual(manifest["timezone_policy_basis"], "project_convention")
+        self.assertIn("observed_at", manifest)
+        target = write_manifest(manifest, self.root / "v2.json", self.root)
+        self.assertEqual(verify_manifest(target, self.root), manifest)
+
+    def test_v2_identity_includes_timezone_basis_but_not_observation_time(self):
+        first = self.manifest(acquired_at=None)
+        self.assertEqual(first["dataset_id"], self.manifest(acquired_at=None)["dataset_id"])
+        declared = self.manifest(acquired_at=None, timezone_policy_basis="publisher_declared")
+        self.assertNotEqual(first["dataset_id"], declared["dataset_id"])
+
 
 if __name__ == "__main__":
     unittest.main()

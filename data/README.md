@@ -8,6 +8,7 @@ This folder separates immutable IBM source files, generated analysis artifacts, 
 | [processed](processed/README.md) | Future validated ingestion and analysis results | Versioned normalized records and evidence; separate evaluation-only labels |
 | [reference](reference/README.md) | Optional independently sourced context | Versioned customer/entity/reference data with explicit availability |
 | [manifest.schema.json](manifest.schema.json) | A generated manifest | Version-1 shape; runtime also checks semantic constraints |
+| [manifest.v2.schema.json](manifest.v2.schema.json) | A generated v2 manifest | Unknown acquisition time and explicit timezone-policy basis |
 | [manifest.template.json](manifest.template.json) | Human-readable field template | Documentation only; placeholders deliberately fail runtime validation |
 
 ## Implemented functionality
@@ -51,7 +52,7 @@ python3 scripts/prepare_data.py verify data/raw/ibm/manifest.json
 
 Create defaults to data/raw/ibm/manifest.json. Use --output for a new version; existing output is never overwritten. --raw-root before the subcommand supports another explicitly chosen local source directory. The CLI returns JSON on success and exit code 2 on invalid inputs, changed sources, missing files, or an existing destination.
 
-## Observation coverage and identity
+When the actual download time is unknown, omit --acquired-at. This creates a version-2 manifest with acquired_at=null and a separate current observed_at. Use --timezone-basis project_convention for an explicitly chosen analysis convention, or publisher_declared only when supported by source evidence. Neither file modification times nor local timezone settings are treated as acquisition/source-time evidence. Version-1 manifests remain supported.
 
 ## Normalization
 

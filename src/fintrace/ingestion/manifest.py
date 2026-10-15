@@ -13,7 +13,7 @@ import json
 import os
 import re
 import tempfile
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 from typing import Any
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
@@ -31,6 +31,7 @@ MANIFEST_FIELDS = {
     "normalization_version", "observation_intervals", "known_gaps", "source_files",
 }
 SOURCE_FIELDS = {"relative_path", "sha256", "byte_count", "header"}
+MANIFEST_FIELDS_V2 = MANIFEST_FIELDS | {"observed_at", "timezone_policy_basis"}
 IDENTITY_FIELDS = (
     "variant", "source_files", "timezone_policy", "timestamp_precision",
     "normalization_version", "observation_intervals", "known_gaps",
@@ -135,23 +136,38 @@ def inspect_source(source_path: Path, raw_root: Path) -> dict[str, Any]:
 
 def _dataset_id(manifest: dict[str, Any]) -> str:
     identity = {field: manifest[field] for field in IDENTITY_FIELDS}
+    if manifest["schema_version"] == "2":
+        identity.update(schema_version="2", timezone_policy_basis=manifest["timezone_policy_basis"])
     encoded = json.dumps(identity, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("utf-8")
     return "ibm-" + hashlib.sha256(encoded).hexdigest()
 
 
 def validate_manifest(manifest: Any) -> dict[str, Any]:
-    """Validate the version-1 single-CSV contract and its reproducible identity."""
-    if not isinstance(manifest, dict) or set(manifest) != MANIFEST_FIELDS:
-        raise ManifestError("Manifest fields do not match the version-1 contract")
-    if manifest["schema_version"] != "1" or manifest["synthetic"] is not True:
-        raise ManifestError("Expected version 1 and synthetic=true")
+    """Validate version 1 or 2 without fabricating missing acquisition metadata."""
+    if not isinstance(manifest, dict):
+        raise ManifestError("Manifest fields must be an object")
+    version = manifest.get("schema_version")
+    if version not in ("1", "2"):
+        raise ManifestError("Expected manifest version 1 or 2")
+    expected = MANIFEST_FIELDS if version == "1" else MANIFEST_FIELDS_V2
+    if set(manifest) != expected:
+        raise ManifestError("Manifest fields do not match the declared version")
+    if manifest["synthetic"] is not True:
+        raise ManifestError("Expected synthetic=true")
     if manifest["variant"] not in VARIANTS:
         raise ManifestError("Unknown IBM dataset variant")
     for field in ("source_url", "source_terms", "normalization_version", "timezone_policy"):
         _required_text(manifest[field], field)
     if not re.match(r"^https://[^/\s]+(?:/|$)", manifest["source_url"]):
         raise ManifestError("source_url must be a public HTTPS source reference")
-    _instant(manifest["acquired_at"], "acquired_at")
+    if version == "1" or manifest["acquired_at"] is not None:
+        _instant(manifest["acquired_at"], "acquired_at")
+    if version == "2":
+        observed = _instant(manifest["observed_at"], "observed_at")
+        if manifest["acquired_at"] is not None and _instant(manifest["acquired_at"], "acquired_at") > observed:
+            raise ManifestError("acquired_at must not be later than observed_at")
+        if manifest["timezone_policy_basis"] not in ("project_convention", "publisher_declared"):
+            raise ManifestError("Invalid timezone_policy_basis")
     try:
         ZoneInfo(manifest["timezone_policy"])
     except (ZoneInfoNotFoundError, ValueError) as error:
@@ -191,7 +207,7 @@ def create_manifest(
     raw_root: Path,
     *,
     variant: str,
-    acquired_at: str,
+    acquired_at: str | None = None,
     timezone_policy: str,
     timestamp_precision: str,
     source_terms: str,
@@ -199,10 +215,11 @@ def create_manifest(
     observation_intervals: list[dict[str, str]] | None = None,
     known_gaps: list[dict[str, str]] | None = None,
     normalization_version: str = "1",
+    timezone_policy_basis: str | None = None,
 ) -> dict[str, Any]:
     """Build provenance for one local file; do not infer observation coverage."""
     manifest = {
-        "schema_version": "1",
+        "schema_version": "2" if acquired_at is None or timezone_policy_basis is not None else "1",
         "variant": variant,
         "synthetic": True,
         "source_url": source_url,
@@ -215,6 +232,9 @@ def create_manifest(
         "known_gaps": known_gaps or [],
         "source_files": [inspect_source(source_path, raw_root)],
     }
+    if manifest["schema_version"] == "2":
+        manifest["observed_at"] = datetime.now(timezone.utc).isoformat()
+        manifest["timezone_policy_basis"] = timezone_policy_basis or "project_convention"
     manifest["dataset_id"] = _dataset_id(manifest)
     return validate_manifest(manifest)
 

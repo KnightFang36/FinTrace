@@ -17,6 +17,8 @@ Implemented source-manifest fields: `schema_version`, `dataset_id`, `variant`, `
 
 Output: immutable manifest and reproducible source identity. An unset timezone policy blocks timestamp-dependent analysis. Coverage may be declared unknown; history-dependent features then remain unavailable.
 
+Version 2 additionally records observed_at and timezone_policy_basis. acquired_at may be null when unknown; observed_at is the tool's actual local observation instant, not a replacement acquisition date. The timezone basis is project_convention or publisher_declared. The basis participates in dataset identity; observation/acquisition times do not. See [the version-2 schema](../data/manifest.v2.schema.json).
+
 ## Transaction
 Inputs: verified positional IBM source columns.
 

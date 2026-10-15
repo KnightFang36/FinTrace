@@ -37,7 +37,8 @@ def main(argv: list[str] | None = None) -> int:
     create = commands.add_parser("create", help="Verify a local CSV and publish a new manifest")
     create.add_argument("source", type=Path)
     create.add_argument("--variant", choices=VARIANTS, required=True)
-    create.add_argument("--acquired-at", required=True, help="ISO timestamp with explicit offset")
+    create.add_argument("--acquired-at", help="Actual acquisition time with offset; omitted means unknown in manifest v2")
+    create.add_argument("--timezone-basis", choices=("project_convention", "publisher_declared"))
     create.add_argument("--timezone", required=True, help="Declared source timezone, e.g. UTC")
     create.add_argument("--timestamp-precision", choices=("minute", "second"), required=True)
     create.add_argument("--source-terms", required=True, help="Terms of the exact acquired copy")
@@ -78,6 +79,7 @@ def main(argv: list[str] | None = None) -> int:
                 timezone_policy=args.timezone, timestamp_precision=args.timestamp_precision,
                 source_terms=args.source_terms, source_url=args.source_url,
                 normalization_version=args.normalization_version,
+                timezone_policy_basis=args.timezone_basis,
                 observation_intervals=[{"start": start, "end": end} for start, end in args.coverage],
                 known_gaps=[{"start": start, "end": end} for start, end in args.gap],
             )
