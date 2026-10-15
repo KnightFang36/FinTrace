@@ -12,6 +12,6 @@ Run the create and verify commands in [the data workflow](../../README.md). The 
 
 A renamed Account.1 header is rejected. The original CSV remains unchanged. UTF-8 with an optional byte-order mark is accepted for the header. Hashes cover original bytes including that mark. Header-only input can be fingerprinted; this does not imply it contains valid transactions.
 
-Optional publisher pattern annotations remain evaluation-only inputs. Do not treat them or Is Laundering values as independent intelligence. Label extraction and normalized Parquet generation are not implemented by the provenance tool.
+Optional publisher pattern annotations remain evaluation-only inputs. Do not treat them or Is Laundering values as independent intelligence. The ingest command extracts benchmark labels and normalizes financial records into separate artifact roots. Pattern parsing currently audits block structure; no pattern-driven detector or benchmark matching is implemented.
 
 For a changed file or interpretation, use a new manifest destination instead of replacing an existing manifest. Successful verification checks local consistency, not whether a download is the authoritative publisher version.

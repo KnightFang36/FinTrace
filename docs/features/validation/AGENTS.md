@@ -1,7 +1,7 @@
 # Financial data validation contract instructions
 
 ## Purpose
-Maintain the authoritative contract in `README.md` for `src/fintrace/validation/`. Implementation is pending.
+Maintain the authoritative contract in README.md for src/fintrace/validation/. Financial source-field validation is implemented; analysis-window eligibility remains a later service responsibility. Record exact decimal limits, timezone behaviour and label-free inputs accurately.
 
 ## Inputs
 - Normalized candidate transactions with source references.

@@ -1,6 +1,6 @@
 # Shared data contracts
 
-The source DatasetManifest contract is implemented in fintrace.ingestion.manifest. Other schemas below remain planned and must be implemented and verified before being advertised as available APIs.
+Source manifests, normalized transaction/account records and ingestion validation artifacts are implemented. Detection findings, scores, alerts, cases and other downstream records remain planned and must be implemented before being advertised as available APIs.
 
 ## Common conventions
 - Identifiers are strings. Account keys contain separate `bank_id` and `account_id` components.
@@ -40,10 +40,17 @@ Additional fields: `transaction_id`, `dataset_id`, `source_file_id`, `source_rec
 
 Self-transfers are retained and annotated. They are not automatically suspicious. Duplicate content is reported, not silently dropped.
 
+Implemented Parquet amounts are decimal(38,8); values outside that exact representation are quarantined without rounding. occurred_at is UTC under the explicit manifest interpretation, and timestamp_precision preserves the source granularity. source_row_hash hashes only the ten financial source fields, excluding the label. Financially valid records with an absent/invalid benchmark label remain accepted; label issues are isolated in evaluation outputs.
+
 ## ObservedAccount
 Fields: structured account key, `first_observed_at`, `last_observed_at`, `observed_currencies[]`, `source_endpoint_roles[]`.
 
 These are observation facts, not verified opening date, customer identity, account balance or ownership. Optional `customer_id` is null until a separate verified table supplies it.
+
+## PublisherAccount and AccountLinkCandidate
+The optional publisher registry preserves Bank Name, Bank ID, Account Number, Entity ID and Entity Name as exact strings, with source checksum/record number, schema/run/source-dataset identity and synthetic=true. It is stored separately from observed detection accounts.
+
+Candidate links preserve both observed and publisher bank IDs. Status is exact_source_key, zero_padding_candidate, ambiguous or unmatched; candidate_count exposes conflicts. Numeric zero-padding equivalence is an explicit diagnostic and does not rewrite account keys or establish verified identity. Pattern annotations and transaction laundering labels are never inputs to this join.
 
 ## OptionalCustomer and EntityLink
 Customer fields: `customer_id`, `entity_type`, `name`, `jurisdiction`, `expected_activity_policy`, `source_id`, `effective_from`, `effective_to`, `observed_at`. All unprovided attributes remain null.

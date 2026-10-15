@@ -2,7 +2,7 @@
 
 An explainable suspicious-transaction and potential money-mule investigation project using IBM's synthetic AML banking benchmark.
 
-**Status: the data provenance foundation is implemented; detection, normalization, persistence, reports, and dashboard features remain pending.** The runnable product screen is still a scaffold status page. See [the data workflow](data/README.md) for local header/checksum verification and manifest commands.
+**Status: source auditing, provenance, financial validation, chunked Parquet normalization and supplemental-account diagnostics are implemented. Detection, case persistence, reports and dashboard features remain pending.** The product screen is still a scaffold status page. See [the data workflow](data/README.md) for actual commands.
 
 The agreed scope uses deterministic transaction rules, historical comparisons, NetworkX graph algorithms, transparent priority scoring, and investigator review. Machine learning, fitted classifiers, learned embeddings, and generated explanations are excluded.
 
@@ -14,7 +14,7 @@ Download separately into `data/raw/ibm/`; this scaffold does not download or red
 
 The standard transaction export contains two source columns called `Account`. Resolve them by verified position, not a blind name-based rename. Preserve account and bank identifiers as strings. Use the pair `(bank_id, account_id)` as an account identity.
 
-The transaction export does not supply verified customer identities, account opening dates, devices, IP addresses, ownership, expected income, or sanctions identities. Derive an observed account registry from transfer endpoints; keep optional customer/reference tables separate and mark unavailable fields explicitly.
+The transaction export does not supply verified customer identities, account opening dates, devices, IP addresses, ownership, expected income, or sanctions identities. A separately supplied accounts export can contain synthetic entity IDs/names. Preserve it separately and report explicit account-link candidates; source entity names are not independently verified KYC. Derive the observed account registry from transfer endpoints and mark missing context explicitly.
 
 ## Features and availability
 
@@ -115,9 +115,11 @@ python scripts/check_scaffold.py
 streamlit run app/streamlit_app.py
 ```
 
-The Streamlit command opens a status page only. The data provenance CLI is available as `python3 scripts/prepare_data.py --help` and requires no installed application dependencies. There is no working detection CLI yet.
+The Streamlit command opens a status page only. `python3 scripts/prepare_data.py --help` lists audit/create/verify/ingest/accounts commands. Audit/create/verify require only the standard library; ingest/accounts use the pinned data environment in config/data-requirements.txt. There is no working detection CLI yet.
 
 Core libraries: Pandas, NetworkX, Matplotlib, Streamlit, DuckDB, PyArrow and PyVis. Pytest is reserved for implementation verification. TOML is read with the Python standard library.
+
+The uploaded HI-Small snapshot has been fully processed and verified: 5,078,345 accepted transactions, 515,088 observed account keys, and zero quarantined financial rows. See [the checked dataset report](docs/data_validation.md) for checksums, label isolation, identifier reconciliation, explicit provenance assumptions and repeatable verification commands.
 
 ## Detection and explanation principles
 

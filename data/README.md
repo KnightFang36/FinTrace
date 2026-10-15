@@ -5,7 +5,7 @@ This folder separates immutable IBM source files, generated analysis artifacts, 
 | Location | Input | Output / responsibility |
 | --- | --- | --- |
 | [raw/ibm](raw/ibm/README.md) | Separately acquired IBM transaction CSV | Immutable source plus a locally generated manifest |
-| [processed](processed/README.md) | Future validated ingestion and analysis results | Versioned normalized records and evidence; separate evaluation-only labels |
+| [processed](processed/README.md) | Validated ingestion and future analysis results | Versioned normalized records and evidence; separate evaluation-only labels |
 | [reference](reference/README.md) | Optional independently sourced context | Versioned customer/entity/reference data with explicit availability |
 | [manifest.schema.json](manifest.schema.json) | A generated manifest | Version-1 shape; runtime also checks semantic constraints |
 | [manifest.v2.schema.json](manifest.v2.schema.json) | A generated v2 manifest | Unknown acquisition time and explicit timezone-policy basis |
@@ -13,7 +13,7 @@ This folder separates immutable IBM source files, generated analysis artifacts, 
 
 ## Implemented functionality
 
-Run `python3 scripts/prepare_data.py --help` from the repository root. This standard-library tool needs no application dependencies.
+Run `python3 scripts/prepare_data.py --help` from the repository root. Command help and audit/create/verify need no application dependencies; ingest/accounts require the data environment.
 
 It verifies the exact ordered IBM CSV header, preserving both columns named Account; computes a streaming SHA-256 hash and byte count; records acquisition/source terms and explicit IANA timezone interpretation; and writes a new manifest without replacing existing files. Verification recomputes the header and checksum. Sources remain inside the selected raw root; direct symbolic-link inputs and path traversal are rejected.
 
@@ -59,6 +59,8 @@ When the actual download time is unknown, omit --acquired-at. This creates a ver
 After creating a valid manifest, install the declared data dependencies and run:
 
 ```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -r config/data-requirements.txt
 .venv/bin/python scripts/prepare_data.py ingest data/raw/ibm/manifest.json
 ```
 
@@ -68,15 +70,13 @@ The adapter uses bounded batches, exact decimal(38,8) values, stable source-reco
 
 The ingest command requires PyArrow and DuckDB. Audit/create/verify use only the standard library. A malformed CSV stream aborts publication; field-level financial errors go to quarantine. Historical eligibility remains unknown without independently declared coverage.
 
-## Coverage declarations
-
 ## Supplemental publisher accounts
 
 After normalization, inventory the supplied synthetic entity table separately:
 
 ```bash
 .venv/bin/python scripts/prepare_data.py accounts \
-  data/processed/datasets/<dataset_id>/accounts.parquet
+  data/processed/datasets/REPLACE_WITH_DATASET_ID/accounts.parquet
 ```
 
 Outputs under data/processed/supplemental/<snapshot_id>/ include publisher_accounts.parquet, account_link_candidates.parquet, quarantine.jsonl and completion.json. Synthetic entity names/IDs come directly from the supplied file. They are source metadata, not independently verified KYC or source-of-wealth information.
@@ -94,6 +94,8 @@ dataset_id hashes source-relative path, content hash/size/header, variant, timez
 The template is not a real manifest and must not be passed to ingestion. Use the CLI to generate actual hashes and identity.
 
 ## Verification
+
+See [the checked local dataset report](../docs/data_validation.md) for the actual uploaded-file counts, hashes, validation results and artifact identities. The report distinguishes benchmark labels from detected activity and records the UTC convention and unknown acquisition/history metadata.
 
 From the repository root:
 

@@ -1,7 +1,7 @@
 # IBM ingestion contract instructions
 
 ## Purpose
-Maintain the authoritative contract in `README.md` for `src/fintrace/ingestion/`. Implementation is pending.
+Maintain the authoritative contract in README.md for src/fintrace/ingestion/. Source auditing, versioned manifests, chunked normalization, label isolation and publisher-account link diagnostics are implemented. Keep actual callable interfaces and command limitations synchronized with the source services.
 
 ## Inputs
 - Immutable IBM CSV with verified positional header, dataset manifest and parsing policy.
