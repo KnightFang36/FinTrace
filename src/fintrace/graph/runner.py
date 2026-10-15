@@ -33,7 +33,7 @@ def run_graph_snapshot(transactions_path, policy_path, cutoff, output_root, *, s
         if marker.is_symlink():
             raise ValueError("Graph-run metadata cannot be a symbolic link")
         previous = json.loads(marker.read_text())
-        if (previous.get("status") != "completed" or previous.get("run_id") != result.artifact["run_id"]
+        if (not isinstance(previous, dict) or previous.get("status") != "completed" or previous.get("run_id") != result.artifact["run_id"]
                 or previous.get("input_hashes") != hashes
                 or set(previous.get("artifacts", {})) != {"graph.json", "network.png"}):
             raise ValueError("Existing graph-run integrity mismatch")

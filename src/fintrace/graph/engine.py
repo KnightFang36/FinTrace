@@ -35,21 +35,29 @@ def analyze_graph(transactions, seed_accounts, graph_policy, cutoff, *, dataset_
     seeds = [seed for seed in supplied if seed in graph] if supplied else sorted(graph, key=lambda node: (-graph.out_degree(node), node))
     seed_partial = not supplied and len(seeds) > policy["max_seed_accounts"]
     seeds = seeds[:policy["max_seed_accounts"]]
+    cycle_candidates = {node for component in nx.strongly_connected_components(graph)
+                        if len(component) >= policy["minimum_cycle_length"] for node in component}
+    cycle_origins = [seed for seed in seeds if seed in cycle_candidates] if supplied else sorted(
+        cycle_candidates, key=lambda node: (-graph.out_degree(node), node)
+    )
+    cycle_partial = not supplied and len(cycle_origins) > policy["max_seed_accounts"]
+    cycle_origins = cycle_origins[:policy["max_seed_accounts"]]
     identity = {"engine": ENGINE_VERSION, "networkx_version": nx.__version__, "policy": policy,
                 "dataset_id": graph.graph["dataset_id"], "cutoff": graph.graph["cutoff"],
                 "input": sorted((data["transaction"] for *_, data in graph.edges(data=True)),
                                 key=lambda item: item.transaction_id),
                 "excluded_self_transfers": graph.graph["excluded_self_transfers"], "seeds": supplied,
-                "selected_origins": seeds, "origin_ranking": "outgoing_edge_count_descending_then_bank_account"}
+                "selected_origins": seeds, "selected_cycle_origins": cycle_origins, "origin_ranking": "outgoing_edge_count_descending_then_bank_account"}
     run_id = "graphs-" + content_id(identity)
     paths, path_coverage = find_temporal_paths(graph, seeds, policy)
-    cycles, cycle_coverage = find_temporal_cycles(graph, seeds, policy)
+    cycles, cycle_coverage = find_temporal_cycles(graph, cycle_origins, policy)
     groups, group_coverage = find_coordinated_groups(graph, policy)
-    for coverage in (path_coverage, cycle_coverage):
+    for coverage, origins, partial in ((path_coverage, seeds, seed_partial),
+                                       (cycle_coverage, cycle_origins, cycle_partial)):
         coverage["seed_scope"] = "explicit_origins" if supplied else "outgoing_edge_count_descending_then_bank_account"
-        coverage["seeds_searched"] = seeds
+        coverage["seeds_searched"] = origins
         coverage["missing_seeds"] = missing
-        if seed_partial:
+        if partial:
             coverage["status"] = "truncated"
             coverage["reason_codes"].append("seed_budget_exhausted")
     findings = []

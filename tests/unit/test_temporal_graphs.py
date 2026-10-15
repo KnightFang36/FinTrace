@@ -160,3 +160,12 @@ def test_automatic_origins_use_declared_outgoing_count_ranking():
     coverage = result.artifact["coverage"]["layering"]
     assert coverage["seeds_searched"] == [AccountKey("1", "Z")]
     assert coverage["seed_scope"] == "outgoing_edge_count_descending_then_bank_account"
+
+
+def test_cycle_origin_budget_is_applied_after_scc_candidate_narrowing():
+    rows = [tx(str(n), "HUB", f"X{n}", "00:01") for n in range(5)]
+    rows += [tx("ab", "A", "B", "00:02"), tx("ba", "B", "A", "00:03")]
+    result = run(rows, max_seed_accounts=1)
+    assert result.artifact["coverage"]["layering"]["seeds_searched"] == [AccountKey("1", "HUB")]
+    assert result.artifact["coverage"]["circular_flow"]["seeds_searched"] == [AccountKey("1", "A")]
+    assert len([item for item in result.findings if item.rule_id == "circular_flow"]) == 1
