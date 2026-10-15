@@ -1,7 +1,7 @@
 # Project instructions
 
 ## Purpose and scope
-Implement the documented FinTrace banking investigation system against IBM's fully synthetic AML benchmark. This repository currently contains scaffolding and contracts, not a completed detector.
+Implement the documented FinTrace banking investigation system against IBM's fully synthetic AML benchmark. Data preparation, transaction rules and bounded temporal graphs are implemented; the remaining feature contracts explicitly mark pending services.
 
 The user's instruction is authoritative: **exclude all machine-learning functionality**. Use explicit transaction rules, deterministic historical comparisons, NetworkX algorithms and auditable policy weights. Do not add Scikit-learn, fitted predictors, embeddings, automated prose generation, or similar features.
 

@@ -1,7 +1,7 @@
 # Temporal graph analysis implementation instructions
 
 ## Purpose
-Own the source service described in `docs/features/temporal_graphs/README.md`. Modules are placeholders until implemented.
+Own the source service described in `docs/features/temporal_graphs/README.md`. Core graph modules are implemented; exposure.py remains pending without independent dated intelligence.
 
 ## Inputs
 - Validated label-free transfers, account keys, explicit time interval and currency policy.
@@ -25,6 +25,8 @@ Own the source service described in `docs/features/temporal_graphs/README.md`. M
 - `communities.py`: Descriptive account communities with declared projection and deterministic settings.
 - `metrics.py`: Descriptive connectivity, volume and approximate centrality metrics.
 - `coordinated_groups.py`: Explicit repeated-window and shared-counterparty group criteria.
+- `engine.py`, `policy.py`, `runner.py`: Strict budgets, finding roles, verified snapshot JSON and source/policy identity.
+- `visualization.py`: Deterministic, bounded PNG display with visible truncation.
 - `exposure.py`: Directional temporal exposure to independent dated reference intelligence.
 
 ## Implementation constraints

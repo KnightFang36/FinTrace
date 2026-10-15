@@ -1,52 +1,70 @@
 # Temporal graph analysis
 
-**Status: implementation pending.** Owner: `src/fintrace/graph/`.
+**Status: core analysis, verified snapshot CLI and bounded PNG visualization implemented.** Independent dated-reference exposure remains pending and disabled. Owner: `src/fintrace/graph/`.
 
-## Proposed interface
-```text
-analyze_graph(transactions, seed_accounts, graph_policy, cutoff) -> GraphAnalysisResult
+## Implemented interfaces
+
+```python
+analyze_graph(transactions, seed_accounts, graph_policy, cutoff, *, dataset_id=None) -> GraphAnalysisResult
+build_transaction_graph(transactions, graph_policy, cutoff, *, dataset_id=None) -> nx.MultiDiGraph
+build_account_summary(graph, currency) -> nx.DiGraph
+find_temporal_paths(graph, seeds, graph_policy) -> (paths, coverage)
+find_temporal_cycles(graph, seeds, graph_policy) -> (cycles, coverage)
+find_coordinated_groups(graph, graph_policy) -> (groups, coverage)
+find_communities(summary, policy) -> dict
+compute_metrics(summary, policy) -> dict
+run_graph_snapshot(transactions_path, policy_path, cutoff, output_root, *, seed_accounts=()) -> dict
+render_graph_png(graph, path, policy) -> dict
 ```
-This is a design signature, not an existing callable API. Concrete types must follow `docs/data_contracts.md`.
 
 ## Inputs
-- Validated label-free transfers, account keys, explicit time interval and currency policy.
-- Search limits, seed accounts, timestamp-tie policy and algorithm configuration.
+
+Inputs are normalized label-free transaction mappings (or revalidated Transaction objects), exact bank/account keys, a complete `config/graph.toml` policy, and a timezone-aware exclusive cutoff. An explicit dataset ID is required for empty in-memory inputs. Snapshot inputs must be completed, checksum-verified detection Parquet artifacts. No evaluation files or supplied pattern annotations are read.
 
 ## Outputs
-- Transaction MultiDiGraph, aggregated account graphs, descriptive metrics and candidate communities.
-- Chronological path/cycle/group findings, exact edge references and search-completeness metadata.
 
-## Functionality
-- Retain every transaction as a separate directed edge; use aggregation only for summaries.
-- Use strongly connected components to narrow cycle candidates; verify each returned cycle against actual chronological transfers.
-- Find bounded forward paths with strictly increasing source timestamps; source order alone does not establish order for tied times.
-- Return community membership and degree/betweenness as context; a central or highly connected account is not independently suspicious.
-- Detect coordinated groups only when explicit repeated timing/counterparty criteria are satisfied.
+The analysis result retains a transaction MultiDiGraph, shared Finding records and a JSON-serializable artifact. Every transfer has its own transaction-ID edge; self-transfers are counted separately and excluded from movement analysis. Currency-specific account summaries retain exact paid/received totals, counts and transaction IDs separately. Conversion edges stay visible but are excluded from patterns and summaries; no FX rate or exact fund attribution is inferred.
+
+## Functionality and evidence
+
+- Paths use bounded DFS over actual transfer edges, strictly increasing timestamps and one currency. Evidence records ordered transaction IDs/times. Only intermediaries are finding subjects; endpoints remain contextual.
+- Cycles first narrow candidates using strongly connected components, then check actual strictly chronological return transfers. Findings report participating accounts, the returning account, initial paid and final received values without claiming the same funds returned.
+- Coordination requires an identical participant set of at least three accounts sharing a directed counterparty in a minute bucket, repeated in at least two distinct complete 60-minute windows. Windows/buckets align to the UTC epoch. Partial boundary windows are withheld. Varying participant sets are outside this conservative rule; counterparties alone are not flagged. The policy can change these counts/window sizes within strict bounds.
+- Descriptive communities use seeded asynchronous label propagation over an unweighted undirected projection of same-currency account pairs. Directed unweighted sampled betweenness and distinct sender/recipient counts provide context. These algorithms create no findings independently. Context computations exceeding node/edge caps report unavailable.
+- Optional dated-reference exposure reports disabled; it never substitutes benchmark annotations for intelligence.
 
 ## Errors and edge cases
-- Apply maximum hop, cycle length, edge, expansion and runtime budgets; return truncation metadata on exhaustion.
-- A structural path failing chronological validation cannot appear as layering evidence.
-- Currency transitions require explicit treatment; no inferred conversion or exact provenance claims.
+
+Input transaction/node overflows raise ValueError rather than sampling. Duplicate conflicting IDs, mixed datasets, labels/unrecognized fields, invalid policies and implicit timezones fail validation. Repeated identical IDs are deduplicated; distinct transaction IDs survive even with identical content.
+
+Explicit seeds constrain path/cycle origins only; they do not filter input edges, coordination or metric scope. Without seeds, origins are ranked by outgoing transfer count, then exact bank/account identity up to `max_seed_accounts`; omitted origins produce truncated coverage. Cycle origins are selected after narrowing to eligible strongly connected components, with an independent seed budget. All requested seeds, missing seeds and actual origins are recorded. Expansion counts include rejected edge candidates. Hop/cycle bounds, per-feature result limits, expansion limits and cooperative wall-clock deadlines bound DFS/group work. Context algorithms use separate hard input-size limits; they are not subject to DFS deadlines. Coverage distinguishes evaluated, truncated, unavailable and disabled. Runtime exhaustion may change partial output across machines; completed persisted artifacts remain checksum-verified and are reused without replacement.
+
+PNG views use a seeded layout and sorted node/edge prefix with separate display limits. Titles show displayed/total counts and partial status. A full display does not imply exhaustive detection or known observation completeness.
+
+## CLI and outputs
+
+```bash
+.venv/bin/python scripts/run_graphs.py PATH/transactions.parquet \
+  --cutoff 2022-09-02T12:00:00Z \
+  --seed BANK_ID ACCOUNT_ID
+```
+
+`--seed` may repeat up to the policy limit; omit it for bounded automatic origin selection. `--policy` selects the complete graph policy. Default output is `data/processed/graph_runs/<run_id>/`:
+
+- `graph.json`: source edges, findings, search coverage, descriptive context and source timestamp/observation assumptions.
+- `network.png`: bounded relationship visualization.
+- `run.json`: dataset/cutoff/policy identity, input hashes, artifact hashes and summary counts.
+
+Existing artifacts are verified before reuse; changed or incomplete outputs fail instead of being overwritten. Rendering is headless; the command keeps its Matplotlib cache under ignored `.cache/`. Generated artifacts stay outside Git. The standalone rule CLI reports graph analysis as separately required rather than pretending it has run.
 
 ## Acceptance criteria
-- A->B at 10:10 and B->C at 10:00 is not a chronological A->C chain.
-- Parallel A->B transfers survive graph construction independently.
-- A bounded interrupted search is visibly partial, never reported as exhaustive.
+
+A->B at 10:10 followed by B->C at 10:00 is not a chronological path. Equal-minute edges do not establish order. Parallel transfers remain independent edges. A truncated search is visibly partial. Changes in future records do not change earlier cutoff findings. Centrality/community membership cannot create an alert.
+
+Run `.venv/bin/python -m pytest tests/unit/test_temporal_graphs.py tests/integration/test_graph_runner.py -q`. See [the graph snapshot report](../../graph_validation.md) for an actual checked IBM run. All findings are review candidates, not confirmed illicit activity or confirmed mule identities.
+
+Algorithm references: [NetworkX MultiDiGraph](https://networkx.org/documentation/stable/reference/classes/multidigraph.html), [strongly connected components](https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.components.strongly_connected_components.html), [sampled betweenness](https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.centrality.betweenness_centrality.html), [asynchronous label propagation](https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.community.label_propagation.asyn_lpa_communities.html).
 
 ## Data availability
-Supported by IBM transaction exports; granularity is limited by source timestamp precision.
 
-## Algorithm and function contracts
-
-| Proposed function | Inputs | Functionality | Outputs |
-| --- | --- | --- | --- |
-| build_transaction_graph | Transactions, interval, currency policy | NetworkX MultiDiGraph keyed by transaction ID | Directed parallel edges and lineage |
-| build_account_summary | Transaction graph, currency | Aggregate compatible values and counts per account pair | DiGraph with contributing edge IDs |
-| find_temporal_paths | Seeds, graph, 180-minute horizon, 3–4 hops, budgets | Expand only strictly increasing times and compatible currency paths | Ordered layering evidence; no automatic amount attribution |
-| find_temporal_cycles | Graph, 2–5 edge cycle bound, 180-minute horizon | Narrow candidates using strongly connected components; validate chronological return paths | Cycle transfers, return account/value, search completeness |
-| find_communities | Selected account summary and explicit algorithm settings | Deterministic descriptive community detection with declared directed-to-undirected projection | Membership and method metadata; no automatic alert |
-| compute_metrics | Bounded graph, approximation policy | Distinct degree, volume, component membership and approximate betweenness | Context metrics with units and approximation metadata |
-| find_coordinated_groups | Candidate accounts, transactions, comparable windows | Require at least 3 accounts in at least 2 distinct non-overlapping 60-minute windows that share directed counterparties and all transact in the same declared minute bucket | Participants, repeated windows, shared counterparties and synchronization evidence |
-| find_known_exposure | Independent dated intelligence, graph, direction/hop policy | Trace observed incoming/outgoing links with timing and reference availability checks | Directional exposure paths with provenance; disabled without references |
-
-Candidate ranking and incomplete searches must be recorded. Returning some cycles does not prove no other cycles exist. If the supported NetworkX version cannot enforce a requested bound directly, implement bounded exploration rather than materializing all simple cycles.
+IBM transaction exports support these observed patterns at source timestamp precision. Independent exposure references are absent; observation completeness remains unknown.

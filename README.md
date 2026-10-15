@@ -2,7 +2,7 @@
 
 An explainable suspicious-transaction and potential money-mule investigation project using IBM's synthetic AML banking benchmark.
 
-**Status: data preparation and six deterministic transaction rules are implemented, with evidence-backed cutoff snapshots. Temporal graphs, priority/alert services, case persistence, reports and dashboard features remain pending.** The product screen is still a scaffold status page. See [the data workflow](data/README.md) and [rule workflow](docs/features/transaction_rules/README.md) for working commands.
+**Status: data preparation and six deterministic transaction rules are implemented, with evidence-backed cutoff snapshots. Temporal NetworkX graphs and bounded PNG views are implemented. Priority/alert services, case persistence, reports and dashboard features remain pending.** The product screen is still a scaffold status page. See [the data workflow](data/README.md) and [rule workflow](docs/features/transaction_rules/README.md) for working commands.
 
 The agreed scope uses deterministic transaction rules, historical comparisons, NetworkX graph algorithms, transparent priority scoring, and investigator review. Machine learning, fitted classifiers, learned embeddings, and generated explanations are excluded.
 
@@ -105,7 +105,7 @@ Labels and benchmark pattern annotations are evaluation inputs only. They must n
 
 ## Local setup
 
-Requires Python 3.11 or newer. These are setup instructions; dependencies have not been installed by this scaffold.
+Requires Python 3.11 or newer. The data/graph environment is pinned in config/data-requirements.txt.
 
 ```bash
 python3 -m venv .venv
@@ -146,4 +146,14 @@ The uploaded HI-Small snapshot has been fully processed and verified: 5,078,345 
 
 ## Next implementation work
 
-The next phase in [the roadmap](docs/roadmap.md) is bounded temporal NetworkX analysis: chronological paths, circular flows and coordinated groups. Priority/alerts, investigation/case services, dashboard/reporting, replay and benchmark evaluation follow. Optional enrichment requires suitable independent inputs.
+Bounded temporal NetworkX analysis is implemented: chronological paths, circular flows, synchronized groups and descriptive graph context. The next phase in [the roadmap](docs/roadmap.md) is priority/alerts, followed by investigation/case services, dashboard/reporting, replay and benchmark evaluation. Optional enrichment requires suitable independent inputs.
+
+Run the verified NetworkX snapshot and bounded PNG export:
+
+```bash
+.venv/bin/python scripts/run_graphs.py \
+  data/processed/datasets/ibm-d09512cc782ac4059163288737a35b3a948ab93d31888fb8da9c6c342b86cde4/transactions.parquet \
+  --cutoff 2022-09-02T12:00:00Z
+```
+
+See [the graph workflow](docs/features/temporal_graphs/README.md) for seed scope, evidence, graph limits and artifact locations.

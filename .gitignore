@@ -31,3 +31,5 @@ outputs/**/*
 # Approved non-sensitive test examples may be committed.
 tests/fixtures/**/*.parquet
 tests/fixtures/**/*.db
+
+.cache/
