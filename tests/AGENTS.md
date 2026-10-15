@@ -18,3 +18,5 @@ Rule tests cover distinct counterparties, legitimate recurring payments, exact t
 Graph tests now cover timestamp ties/reversal, cutoff isolation, precise currencies and identifiers, repeated groups, parallel edges, bounded search/context/rendering, evidence roles and verified publication.
 
 Priority/alert tests cover family suppression, caps, eligibility, source snapshot identity, persistent repeat-run idempotency, evidence/score retention, transactional rollback, stale versions and explicit close/reopen audit.
+
+Frontend AppTest checks use isolated fixture databases for writes. Cover missing-store no-write behavior, filters, current workflow vs cutoff-isolated evidence, explicit reviewed actions and rerender idempotency. Network unit checks cover caps, parallel edges, direction and HTML escaping. Browser verification must not submit analyst actions against the uploaded-data workspace.

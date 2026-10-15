@@ -1,7 +1,7 @@
 # Network investigation contract instructions
 
 ## Purpose
-Maintain the authoritative contract in `README.md` for `src/fintrace/investigations/`. Implementation is pending.
+Maintain the authoritative contract in `README.md` for `src/fintrace/investigations/`. Bounded neighbourhood service and interactive frontend are implemented; general report exports remain pending.
 
 ## Inputs
 - Account/alert seeds, time interval, direction, hop limit and node/edge display budgets.
