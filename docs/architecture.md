@@ -1,7 +1,7 @@
 # Architecture
 
 ## Status and execution boundary
-Data ingestion/validation and deterministic cutoff rule snapshots are implemented. Temporal graph analysis and bounded PNG rendering are implemented through scripts/run_graphs.py. General orchestration, priorities/alerts, case persistence and event replay remain pending. The Streamlit entry point only displays scaffold status. scripts/run_rules.py is the working rule CLI.
+Data ingestion/validation and deterministic cutoff rule snapshots are implemented. Temporal graph analysis and bounded PNG rendering are implemented through scripts/run_graphs.py. Fixed-policy priorities and transactional alert persistence are implemented through scripts/manage_alerts.py. General orchestration, investigation/case services and event replay remain pending. The Streamlit entry point only displays scaffold status. scripts/run_rules.py is the working rule CLI.
 
 ## Layers
 1. Ingestion verifies source headers and provenance; validation separates acceptable records from quarantine.

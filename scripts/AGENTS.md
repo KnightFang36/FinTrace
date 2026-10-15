@@ -22,3 +22,5 @@ ingest creates label-isolated Parquet datasets from a verified manifest; account
 No silent network access, credential prompts, source modification or invented runnable commands. A scaffold check is not a detection-system test.
 
 run_graphs.py delegates to graph.runner, publishing verified graph JSON and a bounded headless PNG. --seed restricts chain/cycle origins while groups and descriptive context retain full loaded-window scope.
+
+manage_alerts.py imports verified compatible snapshots, lists local alerts and delegates explicit version-checked transitions to AlertStore. It defaults to ignored data/processed/alerts.duckdb, never contacts external services, and reports dependency/database errors without exposing tracebacks for expected failures.

@@ -16,3 +16,5 @@ Test financial precision, distinct bank/account identity, source lineage, label 
 Rule tests cover distinct counterparties, legitimate recurring payments, exact totals, FIFO allocation, equal-time exclusions, source coverage, baseline evidence, cutoffs, input order and budgets. Runner tests prove evaluation files remain unread and corrupted artifacts cannot be reused. Add graph/alert tests with those implementations. Never use real personal data or redistribute IBM files in fixtures.
 
 Graph tests now cover timestamp ties/reversal, cutoff isolation, precise currencies and identifiers, repeated groups, parallel edges, bounded search/context/rendering, evidence roles and verified publication.
+
+Priority/alert tests cover family suppression, caps, eligibility, source snapshot identity, persistent repeat-run idempotency, evidence/score retention, transactional rollback, stale versions and explicit close/reopen audit.

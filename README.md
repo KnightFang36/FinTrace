@@ -2,7 +2,7 @@
 
 An explainable suspicious-transaction and potential money-mule investigation project using IBM's synthetic AML banking benchmark.
 
-**Status: data preparation and six deterministic transaction rules are implemented, with evidence-backed cutoff snapshots. Temporal NetworkX graphs and bounded PNG views are implemented. Priority/alert services, case persistence, reports and dashboard features remain pending.** The product screen is still a scaffold status page. See [the data workflow](data/README.md) and [rule workflow](docs/features/transaction_rules/README.md) for working commands.
+**Status: data preparation and six deterministic transaction rules are implemented, with evidence-backed cutoff snapshots. Temporal NetworkX graphs and bounded PNG views are implemented. Fixed-policy priorities and persistent audited alerts are implemented. Investigation/case services, general reports and dashboard features remain pending.** The product screen is still a scaffold status page. See [the data workflow](data/README.md) and [rule workflow](docs/features/transaction_rules/README.md) for working commands.
 
 The agreed scope uses deterministic transaction rules, historical comparisons, NetworkX graph algorithms, transparent priority scoring, and investigator review. Machine learning, fitted classifiers, learned embeddings, and generated explanations are excluded.
 
@@ -146,7 +146,7 @@ The uploaded HI-Small snapshot has been fully processed and verified: 5,078,345 
 
 ## Next implementation work
 
-Bounded temporal NetworkX analysis is implemented: chronological paths, circular flows, synchronized groups and descriptive graph context. The next phase in [the roadmap](docs/roadmap.md) is priority/alerts, followed by investigation/case services, dashboard/reporting, replay and benchmark evaluation. Optional enrichment requires suitable independent inputs.
+Bounded temporal NetworkX analysis is implemented: chronological paths, circular flows, synchronized groups and descriptive graph context. Fixed-policy priority and local audited alert services are also implemented. The next phase in [the roadmap](docs/roadmap.md) is investigation/case services, followed by dashboard/reporting, replay and benchmark evaluation. Optional enrichment requires suitable independent inputs.
 
 Run the verified NetworkX snapshot and bounded PNG export:
 
@@ -157,3 +157,15 @@ Run the verified NetworkX snapshot and bounded PNG export:
 ```
 
 See [the graph workflow](docs/features/temporal_graphs/README.md) for seed scope, evidence, graph limits and artifact locations.
+
+Import matching frozen rule and graph snapshots into local review alerts:
+
+```bash
+.venv/bin/python scripts/manage_alerts.py import \
+  --rules-run data/processed/rule_runs/RULE_RUN_ID \
+  --graph-run data/processed/graph_runs/GRAPH_RUN_ID \
+  --actor local-investigator --at 2026-10-16T12:00:00+05:30
+.venv/bin/python scripts/manage_alerts.py list
+```
+
+Replace run IDs and action time with actual values. See [the alert workflow](docs/features/alerts/README.md) for persistence, priority ledgers and audited state changes, and [checked results](docs/priority_alert_validation.md) for the verified IBM snapshot.

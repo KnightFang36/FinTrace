@@ -13,4 +13,4 @@ The fintrace package.
 Keep domain services under fintrace and shared records in its contracts module. Do not place UI or bulk data here.
 
 ## Constraints
-Respect deeper folder instructions and module implementation status. Ingestion/source auditing, financial validation and deterministic transaction rules are implemented; temporal graphs and bounded PNG visualization are implemented. Priority/alert, case and UI services remain pending. Avoid import-time side effects or network requests.
+Respect deeper folder instructions and module implementation status. Ingestion/source auditing, financial validation and deterministic transaction rules are implemented; temporal graphs and bounded PNG visualization are implemented. Fixed-policy priorities and transactional audited alerts are implemented. Investigation/case and UI services remain pending. Avoid import-time side effects or network requests.

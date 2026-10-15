@@ -1,7 +1,7 @@
 # Explainable priority scoring contract instructions
 
 ## Purpose
-Maintain the authoritative contract in `README.md` for `src/fintrace/scoring/`. Implementation is pending.
+Maintain the authoritative contract in `README.md` for `src/fintrace/scoring/`. Fixed-family scoring and immutable priority ledgers are implemented.
 
 ## Inputs
 - Evidence-backed findings with subject roles and versioned fixed scoring policy.
