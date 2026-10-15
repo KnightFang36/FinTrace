@@ -1,7 +1,7 @@
 # IBM ingestion implementation instructions
 
 ## Purpose
-Own the source service described in `docs/features/ingestion/README.md`. Modules are placeholders until implemented.
+Own the source service described in `docs/features/ingestion/README.md`. Source provenance/header verification in manifest.py is implemented; the CSV normalization adapter remains pending. Follow data/README.md for the manifest and CLI contract.
 
 ## Inputs
 - Immutable IBM CSV with verified positional header, dataset manifest and parsing policy.

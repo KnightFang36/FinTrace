@@ -4,7 +4,7 @@
 Use the Kaggle distribution linked by [IBM AML-Data](https://github.com/IBM/AML-Data):
 [IBM Transactions for Anti Money Laundering](https://www.kaggle.com/datasets/ealtman2019/ibm-transactions-for-anti-money-laundering-aml).
 
-The initial planned variant is HI-Small. No source data is included here. Download access may require an account or acceptance of source terms; record those conditions. Never embed credentials in scripts or documentation.
+The initial planned variant is HI-Small. No source data is included here. Download access may require an account or acceptance of source terms; record those conditions. Never embed credentials in scripts or documentation. The implemented local manifest create/verify workflow is documented in [data/README.md](../data/README.md); full normalization remains pending.
 
 IBM describes the data as fully synthetic and identifies the data license as CDLA-Sharing-1.0, separately from the repository code license. Keep acquisition and redistribution decisions tied to the exact downloaded files.
 

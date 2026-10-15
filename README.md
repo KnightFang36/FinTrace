@@ -2,7 +2,7 @@
 
 An explainable suspicious-transaction and potential money-mule investigation project using IBM's synthetic AML banking benchmark.
 
-**Status: repository scaffold and implementation contracts. Detection, persistence, reports, and dashboard features are not implemented yet.** Python module placeholders identify their intended responsibility. The only runnable product screen is a scaffold status page.
+**Status: the data provenance foundation is implemented; detection, normalization, persistence, reports, and dashboard features remain pending.** The runnable product screen is still a scaffold status page. See [the data workflow](data/README.md) for local header/checksum verification and manifest commands.
 
 The agreed scope uses deterministic transaction rules, historical comparisons, NetworkX graph algorithms, transparent priority scoring, and investigator review. Machine learning, fitted classifiers, learned embeddings, and generated explanations are excluded.
 
@@ -115,7 +115,7 @@ python scripts/check_scaffold.py
 streamlit run app/streamlit_app.py
 ```
 
-The Streamlit command opens a status page only. There is no working detection CLI yet. Future commands must be documented only after they exist.
+The Streamlit command opens a status page only. The data provenance CLI is available as `python3 scripts/prepare_data.py --help` and requires no installed application dependencies. There is no working detection CLI yet.
 
 Core libraries: Pandas, NetworkX, Matplotlib, Streamlit, DuckDB, PyArrow and PyVis. Pytest is reserved for implementation verification. TOML is read with the Python standard library.
 

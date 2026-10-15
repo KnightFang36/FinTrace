@@ -10,7 +10,7 @@ Customer profiles, entity links, source channel mappings and external reference 
 Versioned reference snapshots and field availability metadata.
 
 ## Functionality
-Record source, effective date, observed-at date, scope and source terms for each table. Supply only context actually available for the chosen analysis cutoff.
+Record source, effective date, observed-at date, scope and source terms for each future table. Supply only context actually available for the chosen analysis cutoff. README.md documents these optional contracts; no reference tables or enrichment service are supplied yet.
 
 ## Constraints
 IBM account IDs are not identities or countries. Do not invent enrichment. Sensitive reference content remains local and ignored. Screening is disabled by default.

@@ -1,6 +1,6 @@
 # Shared data contracts
 
-All schemas below are planned. Names and constraints must be implemented and verified before being advertised as available APIs.
+The source DatasetManifest contract is implemented in fintrace.ingestion.manifest. Other schemas below remain planned and must be implemented and verified before being advertised as available APIs.
 
 ## Common conventions
 - Identifiers are strings. Account keys contain separate `bank_id` and `account_id` components.
@@ -13,7 +13,7 @@ All schemas below are planned. Names and constraints must be implemented and ver
 ## DatasetManifest
 Input: manually supplied provenance plus file metadata computed at ingestion.
 
-Fields: `dataset_id`, `variant`, `source_url`, `acquired_at`, `source_files[]` with relative path/hash/byte count, `source_terms`, `timezone_policy`, `timestamp_precision`, `observation_intervals[]`, `known_gaps[]`, `normalization_version`.
+Implemented source-manifest fields: `schema_version`, `dataset_id`, `variant`, `synthetic`, `source_url`, `acquired_at`, `source_files[]` with `relative_path`, `sha256`, `byte_count` and exact ordered `header`, `source_terms`, `timezone_policy`, `timestamp_precision`, `observation_intervals[]`, `known_gaps[]`, `normalization_version`. See [the version-1 schema](../data/manifest.schema.json) and [data workflow](../data/README.md). Version 1 supports one CSV; optional benchmark annotations require their own future provenance contract.
 
 Output: immutable manifest and reproducible source identity. An unset timezone policy blocks timestamp-dependent analysis. Coverage may be declared unknown; history-dependent features then remain unavailable.
 

@@ -1,1 +1,1 @@
-"""ingestion: planned FinTrace service package; implementation pending."""
+"""Source provenance is available; transaction normalization remains pending."""

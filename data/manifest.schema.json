@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FinTrace IBM source manifest v1",
+  "description": "Runtime validation also checks IANA timezone, interval ordering, path containment, and the dataset identity hash.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "dataset_id",
+    "variant",
+    "synthetic",
+    "source_url",
+    "acquired_at",
+    "source_terms",
+    "timezone_policy",
+    "timestamp_precision",
+    "normalization_version",
+    "observation_intervals",
+    "known_gaps",
+    "source_files"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1"
+    },
+    "dataset_id": {
+      "type": "string",
+      "pattern": "^ibm-[0-9a-f]{64}$"
+    },
+    "variant": {
+      "enum": [
+        "HI-Small",
+        "HI-Medium",
+        "HI-Large",
+        "LI-Small",
+        "LI-Medium",
+        "LI-Large"
+      ]
+    },
+    "synthetic": {
+      "const": true
+    },
+    "source_url": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://"
+    },
+    "acquired_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source_terms": {
+      "type": "string",
+      "minLength": 1
+    },
+    "timezone_policy": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Explicit IANA source-time interpretation; checked at runtime. This is a declared policy, not a claim about publisher timezone."
+    },
+    "timestamp_precision": {
+      "enum": [
+        "minute",
+        "second"
+      ]
+    },
+    "normalization_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "observation_intervals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "start",
+          "end"
+        ],
+        "properties": {
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "Declared complete observation horizons, not inferred from minimum/maximum timestamps; [] means unknown."
+    },
+    "known_gaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "start",
+          "end"
+        ],
+        "properties": {
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "source_files": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "relative_path",
+          "sha256",
+          "byte_count",
+          "header"
+        ],
+        "properties": {
+          "relative_path": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Canonical POSIX path within raw_root; runtime rejects traversal and symlinks."
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "byte_count": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "header": {
+            "const": [
+              "Timestamp",
+              "From Bank",
+              "Account",
+              "To Bank",
+              "Account",
+              "Amount Received",
+              "Receiving Currency",
+              "Amount Paid",
+              "Payment Currency",
+              "Payment Format",
+              "Is Laundering"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

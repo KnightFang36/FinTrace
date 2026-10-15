@@ -54,7 +54,7 @@ def main() -> int:
     markdown_files = [ROOT / "README.md", ROOT / "AGENTS.md"]
     for relative in CODE_AND_DOC_ROOTS:
         markdown_files.extend((ROOT / relative).rglob("*.md"))
-    markdown_files.extend((ROOT / "data").rglob("AGENTS.md"))
+    markdown_files.extend((ROOT / "data").rglob("*.md"))
     markdown_files.extend((ROOT / "outputs").rglob("AGENTS.md"))
     for path in markdown_files:
         content = path.read_text(encoding="utf-8")

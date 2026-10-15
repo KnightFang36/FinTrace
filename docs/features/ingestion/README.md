@@ -1,6 +1,8 @@
 # IBM ingestion
 
-**Status: implementation pending.** Owner: `src/fintrace/ingestion/`.
+**Status: source provenance/header verification is implemented; transaction normalization and label extraction remain pending.** Owner: `src/fintrace/ingestion/`.
+
+Available now in `manifest.py`: `inspect_source`, `create_manifest`, `validate_manifest`, `write_manifest`, `load_manifest`, and `verify_manifest`. The CLI and exact input/output semantics are documented in [the data workflow](../../../data/README.md). These functions inspect headers and bytes, not financial rows.
 
 ## Proposed interface
 ```text

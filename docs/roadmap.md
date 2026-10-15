@@ -1,6 +1,6 @@
 # Implementation roadmap
 
-The current deliverable is a scaffold. None of the phases below is completed by the existence of placeholder modules.
+The scaffold and local source-manifest create/verify tool are available. Phase 1 is partially implemented: source header/checksum/provenance checks exist, while normalization, financial row validation and storage remain pending. No later phase is completed by the existence of placeholder modules.
 
 | Phase | Deliverables | Completion evidence |
 | --- | --- | --- |
