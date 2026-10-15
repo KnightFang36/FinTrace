@@ -7,10 +7,10 @@ Verify the implemented source/data boundary and add meaningful checks as downstr
 Small clearly labelled handcrafted fixtures and expected financial/temporal behaviour.
 
 ## Outputs
-Focused unit and integration results for implemented source auditing, provenance, validation, ingestion and publisher diagnostics.
+Focused unit and integration results for implemented source auditing, provenance, validation, ingestion, publisher diagnostics and deterministic transaction rules.
 
 ## Functionality
 Test financial precision, distinct bank/account identity, source lineage, label isolation, chronological paths, tied timestamps, bounded searches, score caps and workflow transitions.
 
 ## Constraints
-There are no detector tests yet. Add tests with implementation rather than assertions that merely mirror placeholders. Never use real personal data or redistribute IBM files in fixtures.
+Rule tests cover distinct counterparties, legitimate recurring payments, exact totals, FIFO allocation, equal-time exclusions, source coverage, baseline evidence, cutoffs, input order and budgets. Runner tests prove evaluation files remain unread and corrupted artifacts cannot be reused. Add graph/alert tests with those implementations. Never use real personal data or redistribute IBM files in fixtures.

@@ -81,4 +81,4 @@ Account aggregation and publisher reconciliation both completed using a 512 MB D
 
 ## Remaining scope
 
-The data preparation boundary is implemented. Rule/graph detection, account priorities, alert/case services, investigation dashboards, report exports and benchmark detector evaluation remain pending. Optional reference intelligence and complete-history declarations are not fabricated.
+This report verifies the data preparation boundary. Implemented transaction-rule checks are documented separately in [the rule snapshot report](rule_validation.md). Temporal graphs, account priorities, alert/case services, investigation dashboards, report exports and benchmark detector evaluation remain pending. Optional reference intelligence and complete-history declarations are not fabricated.

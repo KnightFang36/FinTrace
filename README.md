@@ -2,7 +2,7 @@
 
 An explainable suspicious-transaction and potential money-mule investigation project using IBM's synthetic AML banking benchmark.
 
-**Status: source auditing, provenance, financial validation, chunked Parquet normalization and supplemental-account diagnostics are implemented. Detection, case persistence, reports and dashboard features remain pending.** The product screen is still a scaffold status page. See [the data workflow](data/README.md) for actual commands.
+**Status: data preparation and six deterministic transaction rules are implemented, with evidence-backed cutoff snapshots. Temporal graphs, priority/alert services, case persistence, reports and dashboard features remain pending.** The product screen is still a scaffold status page. See [the data workflow](data/README.md) and [rule workflow](docs/features/transaction_rules/README.md) for working commands.
 
 The agreed scope uses deterministic transaction rules, historical comparisons, NetworkX graph algorithms, transparent priority scoring, and investigator review. Machine learning, fitted classifiers, learned embeddings, and generated explanations are excluded.
 
@@ -18,7 +18,7 @@ The transaction export does not supply verified customer identities, account ope
 
 ## Features and availability
 
-| Feature | Planned functionality | Inputs | Outputs | IBM-only support |
+| Feature | Functionality | Inputs | Outputs | IBM-only support |
 | --- | --- | --- | --- | --- |
 | [Ingestion](docs/features/ingestion/README.md) | Normalize and preserve source lineage | IBM CSV, dataset manifest | Transactions, observed accounts, separate benchmark labels | Yes |
 | [Validation](docs/features/validation/README.md) | Check schema, amounts, timestamps, identifiers and duplicates | Normalized batches, schema policy | Accepted rows, quarantine, quality report | Yes |
@@ -115,7 +115,17 @@ python scripts/check_scaffold.py
 streamlit run app/streamlit_app.py
 ```
 
-The Streamlit command opens a status page only. `python3 scripts/prepare_data.py --help` lists audit/create/verify/ingest/accounts commands. Audit/create/verify require only the standard library; ingest/accounts use the pinned data environment in config/data-requirements.txt. There is no working detection CLI yet.
+The Streamlit command opens a status page only. `python3 scripts/prepare_data.py --help` lists data commands. Audit/create/verify require only the standard library; ingest/accounts and the rule runner use the pinned data environment in config/data-requirements.txt.
+
+Run a deterministic snapshot on the prepared local dataset:
+
+```bash
+.venv/bin/python scripts/run_rules.py \
+  data/processed/datasets/ibm-d09512cc782ac4059163288737a35b3a948ab93d31888fb8da9c6c342b86cde4/transactions.parquet \
+  --cutoff 2022-09-02T12:00:00Z
+```
+
+Findings and feature coverage are written under data/processed/rule_runs/<run_id>/. Each rule uses its own configured interval ending at the exclusive cutoff. Input overflow fails instead of sampling. History-dependent rules remain unavailable when observation coverage is unknown. See [the checked rule snapshot](docs/rule_validation.md) for measured results and limits.
 
 Core libraries: Pandas, NetworkX, Matplotlib, Streamlit, DuckDB, PyArrow and PyVis. Pytest is reserved for implementation verification. TOML is read with the Python standard library.
 
@@ -136,4 +146,4 @@ The uploaded HI-Small snapshot has been fully processed and verified: 5,078,345 
 
 ## Next implementation work
 
-Follow [the roadmap](docs/roadmap.md): ingestion and validation first, then deterministic rules and temporal graph detection, scoring and alerts, storage and investigations, dashboard and reports, replay and benchmark evaluation. Optional enrichment and screening follow only when suitable data is available.
+The next phase in [the roadmap](docs/roadmap.md) is bounded temporal NetworkX analysis: chronological paths, circular flows and coordinated groups. Priority/alerts, investigation/case services, dashboard/reporting, replay and benchmark evaluation follow. Optional enrichment requires suitable independent inputs.

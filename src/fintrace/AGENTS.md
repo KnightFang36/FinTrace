@@ -10,7 +10,7 @@ Validated financial records, explicit policy and run/cutoff identity.
 Deterministic evidence, priority, alerts, investigation data and audit artifacts.
 
 ## Functionality
-contracts.py will define shared records; pipeline.py will orchestrate services while preserving dependencies in docs/architecture.md. Subpackages own their feature logic.
+contracts.py defines exact account/transaction records, findings, feature coverage and rule results. pipeline.py remains pending general orchestration. rules/engine.py owns deterministic evaluation; rules/runner.py owns verified snapshot loading/publication. Preserve dependencies in docs/architecture.md and keep subpackage business logic separate.
 
 ## Constraints
 Do not expose placeholder APIs as working. Ingestion may extract benchmark labels into a separate evaluation artifact; evaluation alone may consume that artifact. All detection and investigation services remain label-free. No floating-point money, implicit timezones, hidden currency conversion or unsupported exact-provenance claims.

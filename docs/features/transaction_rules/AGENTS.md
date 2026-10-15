@@ -1,7 +1,7 @@
 # Deterministic transaction rules contract instructions
 
 ## Purpose
-Maintain the authoritative contract in `README.md` for `src/fintrace/rules/`. Implementation is pending.
+Maintain the authoritative contract in README.md for src/fintrace/rules/. Six core rules, exact evidence records, coverage gates and the verified Parquet snapshot runner are implemented. Graph, priority, alert and optional-context services remain separate phases.
 
 ## Inputs
 - Validated, label-free transactions available before the analysis cutoff.

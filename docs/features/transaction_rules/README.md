@@ -61,3 +61,49 @@ The repeated-splitting rule intentionally records a broad pattern. Repeated legi
 
 ## Minimal worked acceptance example
 Given same-currency incoming payments of 100, 100 and 100, followed strictly later by an eligible outgoing payment of 250 within 60 minutes, the allocated forwarded ratio is 250/300. The finding must include all four transaction IDs, the 300 denominator, the 250 allocated value and the FIFO assumption. Reversing the payment order must remove that pass-through finding. This is a handcrafted specification example, not IBM data.
+
+## Command-line workflow
+
+Use the prepared detection artifact and an explicit exclusive cutoff:
+
+```bash
+.venv/bin/python scripts/run_rules.py \
+  data/processed/datasets/ibm-d09512cc782ac4059163288737a35b3a948ab93d31888fb8da9c6c342b86cde4/transactions.parquet \
+  --cutoff 2022-09-02T12:00:00Z
+```
+
+Use --policy for another validated TOML file and --output-root for another local artifact root. Add --account BANK_ID ACCOUNT_ID, repeated if needed, to analyze only exact subject keys. Bank/account strings retain leading zeros. Counterparties remain evidence participants, not automatically included subjects.
+
+The runner verifies the transaction and quality-file hashes in the completed dataset inventory. It validates the normalized schema, projects only financial columns and excludes all records at cutoff or later. It does not open evaluation-label or pattern files. It reads the largest configured active window; when historical rules have declared source coverage, it reads the relevant complete prefix for the selected subject scope so prior-activity anchors are retained. Large prefixes must be narrowed with account scope or an explicitly reviewed input budget; they are never silently sampled.
+
+Current context fields are dataset_id, subject_accounts, observation_intervals, known_gaps, timezone_policy, timezone_policy_basis and timestamp_precision. Unknown context keys, including benchmark/enrichment payloads, are rejected. Verified-context detection is reserved for the later context phase.
+
+## Output contracts
+
+Artifacts under data/processed/rule_runs/<run_id>/:
+
+- findings.json: RuleResult, including findings, policy/run/dataset identity, cutoff, source timing context and per-rule coverage.
+- run.json: run summary, exact input hashes, finding counts, feature statuses and findings-file checksum.
+
+A completed repeat run verifies the inputs and findings checksum and returns reused. Corrupted/incomplete output is rejected without overwriting it. Runtime artifacts stay ignored by Git.
+
+Each finding includes one primary account and its role, source transaction IDs, a half-open active interval, currency-specific measurements, actual thresholds and a fixed explanatory template. Pass-through includes the FIFO allocation ledger and exact numerator/denominator; its displayed ratio is rounded to six decimal places, while eligibility uses exact cross multiplication. Baseline and dormancy anchors may reference older transactions; those historical IDs are included explicitly and count toward evidence limits.
+
+## Coverage and deterministic semantics
+
+- Unknown observation coverage makes burst and dormancy unavailable even if file timestamps span enough calendar days.
+- Burst comparisons use complete 24-hour UTC-offset days. Counts stay aligned with their comparison windows, the median excludes the active interval, and a zero median is unavailable. The comparison window is bounded to 24 hours and lookback to 365 days.
+- Dormancy requires actual prior activity, a completely covered quiet gap and enough current activity. First appearance is not reactivation.
+- The default movement/frequency analysis excludes exact-key self-transfers.
+- A same-time outgoing transfer cannot consume a same-time inflow. Stable identifier order only resolves bookkeeping among equal-time outgoing transfers.
+- Same-currency asset values are compared at each account; no exchange rate is inferred.
+- The default limits are 250,000 input records, 10,000 findings per rule, 10,000 evidence transactions per finding and 20,000 FIFO allocation entries. Input overflow fails. Findings with incomplete evidence are withheld and coverage is truncated; no silent ID clipping occurs.
+- Coverage reports evaluated_groups, unavailable_groups_by_reason, truncated_groups and findings. An evaluated rule may still have unavailable groups; read the reasons and counters.
+- Graph rules are unavailable until the graph phase. Optional cash-out/profile/exposure rules are disabled or unavailable until verified-context services exist.
+- Snapshot windows can overlap across runs; incident grouping/deduplication belongs to the later alerts phase.
+
+## Verification
+
+Run `.venv/bin/python -m pytest tests -q` and `python3 scripts/check_scaffold.py`. Handcrafted tests cover true patterns and legitimate counterexamples, exact-money totals, chronology/ties, distinct counterparties, currency separation, observation gaps, zero baselines, historical anchors, future-record isolation, subject scope, record order, budgets and artifact integrity.
+
+See [the checked IBM snapshot](../../rule_validation.md) for source-backed results. Pattern findings are review candidates, not proven illicit activity, risk scores or confirmed mule identities.

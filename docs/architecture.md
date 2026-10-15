@@ -1,7 +1,7 @@
 # Architecture
 
 ## Status and execution boundary
-This is a design contract. Package modules are placeholders, not implemented services. Local batch analysis comes first; chronological event replay follows. The Streamlit entry point only displays scaffold status.
+Data ingestion/validation and deterministic cutoff rule snapshots are implemented. General orchestration, temporal graph analysis, priorities/alerts, case persistence and event replay remain pending. The Streamlit entry point only displays scaffold status. scripts/run_rules.py is the working rule CLI.
 
 ## Layers
 1. Ingestion verifies source headers and provenance; validation separates acceptable records from quarantine.
@@ -17,7 +17,7 @@ This is a design contract. Package modules are placeholders, not implemented ser
 
 Ingestion writes normalized records and a physically separate benchmark-label artifact. Evaluation may read both artifacts. Rules, graphs, context, scoring, alerts, investigations and replay must never read benchmark labels. Keep raw labels out of ordinary storage queries and dashboard data.
 
-`contracts.py` defines shared record types. `pipeline.py` coordinates a run, explicit configuration hashes and per-feature coverage results. All deterministic operations must use stable ordering and reproducible identifiers.
+contracts.py defines exact account/transaction records, findings, feature coverage and rule results. rules/engine.py evaluates six core rules and explicit capability gates; rules/runner.py verifies and projects completed detection Parquet before publishing snapshot artifacts. pipeline.py remains reserved for later combined orchestration. All deterministic operations use stable ordering and reproducible identifiers.
 
 ## Storage and identity
 Use Parquet for normalized datasets and DuckDB for local queryable evidence and case tables. Source data is immutable. Dataset versions are content-addressed by source hashes plus normalization configuration. Derive stable transaction IDs from dataset ID, relative source-file identity and source record number; do not hash only the transfer values, because identical-valued payments can be separate events.
@@ -26,6 +26,8 @@ Account identity is the structured pair of source bank and account strings. In s
 
 ## Time, value and observation coverage
 Every run declares a cutoff, timestamp precision, timezone policy, window boundaries and source coverage. Default windows are half-open `[start, end)`. Calendar horizons use the declared analysis timezone. Preserve source precision: a stable row order resolves display/replay ordering, but does not prove temporal order between equal timestamps.
+
+The implemented rule runner is a cutoff snapshot, not a full-history scan. Historical comparison days are explicitly fixed 24-hour UTC offsets, rather than local calendar-day arithmetic. Burst windows cannot exceed that offset. Equal-time inflows cannot fund equal-time outflows under the FIFO pass-through policy.
 
 Use Decimal or declared scaled integers for money. A decimal string is the external representation. Preserve amount paid and amount received with their respective currencies. Do not treat a difference as a fee without supporting data.
 

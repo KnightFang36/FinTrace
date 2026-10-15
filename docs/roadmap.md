@@ -1,6 +1,6 @@
 # Implementation roadmap
 
-The data branch implements source auditing, versioned manifests, financial-row validation, chunked Parquet normalization, observed accounts, quarantine, label isolation and publisher-account link diagnostics. Phase 1's data artifact boundary is implemented; general workflow/case persistence remains a later service. Detection phases are still pending.
+Data preparation and phase-2 deterministic transaction rules are implemented. Six core rules produce traceable evidence and explicit feature coverage through a bounded cutoff-snapshot CLI. General workflow/case persistence remains a later service. Phase 3, temporal NetworkX analysis, is the next implementation step.
 
 | Phase | Deliverables | Completion evidence |
 | --- | --- | --- |

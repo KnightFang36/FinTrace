@@ -3,5 +3,5 @@
 Inputs: dataset manifest, explicit analysis cutoff and versioned configuration.
 Outputs: analysis run metadata, quality diagnostics, findings, scores and alerts.
 Functionality: coordinate bounded services while excluding benchmark labels.
-Implementation is intentionally pending; no analysis entry point exists yet.
+Combined orchestration is pending; scripts/run_rules.py provides the implemented rule snapshot entry point.
 """

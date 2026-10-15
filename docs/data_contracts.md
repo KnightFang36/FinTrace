@@ -1,6 +1,6 @@
 # Shared data contracts
 
-Source manifests, normalized transaction/account records and ingestion validation artifacts are implemented. Detection findings, scores, alerts, cases and other downstream records remain planned and must be implemented before being advertised as available APIs.
+Source manifests, normalized transaction/account records, ingestion validation artifacts, core rule findings, feature coverage and RuleResult are implemented. Graph evidence, priorities, alerts, cases and other downstream records remain planned.
 
 ## Common conventions
 - Identifiers are strings. Account keys contain separate `bank_id` and `account_id` components.
@@ -67,10 +67,14 @@ Fields: `finding_id`, `rule_id`, `rule_version`, `subject_accounts[]`, `subject_
 
 Measurements include units, denominators and allocation policy where relevant. Role assignment distinguishes forwarding/collecting intermediaries from counterparties. Do not give every participant in a suspicious network the same role or priority.
 
+Implemented rule findings are frozen typed records with dataset identity and stable IDs derived from actual evidence, policy/version, subject, currency and window. Decimal values serialize as strings. Burst evidence includes baseline transaction IDs aligned to comparison windows; dormancy includes a prior-activity reference outside the activation interval. Evidence caps withhold incomplete findings and mark coverage truncated instead of silently dropping IDs.
+
 ## FeatureCoverage
 Fields: `feature_id`, `status` (evaluated/disabled/unavailable/truncated/failed), `reason_codes[]`, `analysis_window`, `source_coverage`, `search_budget`, `observed_work`.
 
 No findings with an unavailable status is not a clean-account determination.
+
+Rule coverage records evaluated-group counts, unavailable groups by reason, truncation counts, budgets and declared source coverage. A rule can be evaluated for some groups while other groups are unavailable; inspect observed_work and reason_codes. RuleResult wraps findings and coverage with engine/run/dataset identity, cutoff, policy hash and exact subject scope.
 
 ## GraphEvidence
 Fields: `graph_id`, graph type, account nodes, transaction edges, currency policy, temporal ordering policy, seed accounts, searched horizon, bounds and truncation diagnostics.
