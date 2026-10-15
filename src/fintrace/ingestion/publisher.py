@@ -86,10 +86,19 @@ def reconcile_publisher_accounts(
         connection = duckdb.connect()
         try:
             connection.execute("SET memory_limit='512MB'")
-            connection.execute("SET threads=2")
+            connection.execute("SET threads=1")
+            connection.execute("SET preserve_insertion_order=false")
             connection.execute("SET temp_directory=?", [str(stage / "scratch")])
             query = """
-                WITH candidates AS (
+                WITH observed_keys AS (
+                    SELECT *, CASE WHEN regexp_full_match(bank_id,'[0-9]+')
+                        THEN 'numeric:' || coalesce(nullif(ltrim(bank_id,'0'),''),'0')
+                        ELSE 'literal:' || bank_id END AS review_join_key FROM read_parquet(?)
+                ), publisher_keys AS (
+                    SELECT *, CASE WHEN regexp_full_match(bank_id,'[0-9]+')
+                        THEN 'numeric:' || coalesce(nullif(ltrim(bank_id,'0'),''),'0')
+                        ELSE 'literal:' || bank_id END AS review_join_key FROM read_parquet(?)
+                ), candidates AS (
                     SELECT o.schema_version, o.run_id, o.dataset_id, o.bank_id, o.account_id,
                         p.bank_id AS publisher_bank_id, p.entity_id AS publisher_entity_id,
                         p.source_record_number AS publisher_source_record_number,
@@ -98,14 +107,8 @@ def reconcile_publisher_accounts(
                              WHEN p.bank_id IS NULL THEN 'unmatched'
                              ELSE 'zero_padding_candidate' END AS proposed_status,
                         count(p.account_id) OVER (PARTITION BY o.bank_id,o.account_id) AS candidate_count
-                    FROM read_parquet(?) o LEFT JOIN read_parquet(?) p
-                      ON o.account_id=p.account_id AND (
-                        o.bank_id=p.bank_id OR (
-                          regexp_full_match(o.bank_id,'[0-9]+') AND regexp_full_match(p.bank_id,'[0-9]+')
-                          AND coalesce(nullif(ltrim(o.bank_id,'0'),''),'0')
-                            = coalesce(nullif(ltrim(p.bank_id,'0'),''),'0')
-                        )
-                      )
+                    FROM observed_keys o LEFT JOIN publisher_keys p
+                      ON o.account_id=p.account_id AND o.review_join_key=p.review_join_key
                 )
                 SELECT * EXCLUDE(proposed_status),
                     CASE WHEN candidate_count>1 THEN 'ambiguous' ELSE proposed_status END AS link_status
