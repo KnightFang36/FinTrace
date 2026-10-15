@@ -1,12 +1,14 @@
 # Deterministic transaction rules
 
-**Status: implementation pending.** Owner: `src/fintrace/rules/`.
+**Status: six deterministic core rules and their evidence/coverage engine are implemented.** Owner: `src/fintrace/rules/`.
 
-## Proposed interface
+## Implemented interface
 ```text
-evaluate_rules(transactions, history, policy, cutoff, context=None) -> RuleResult
+evaluate_rules(transactions, history=None, *, policy, cutoff, context=None) -> RuleResult
 ```
-This is a design signature, not an existing callable API. Concrete types must follow `docs/data_contracts.md`.
+Inputs are normalized label-free mappings, a validated TOML-derived policy and an explicit timezone-aware exclusive cutoff. RuleResult contains findings, per-rule coverage, deterministic run identity, scope and policy hash; to_dict() returns JSON-compatible decimal strings and timestamps. Unknown record/context fields are rejected rather than silently passing benchmark columns through.
+
+Evaluation is one cutoff snapshot: each core rule examines its configured half-open interval ending at cutoff. It is not a full-history rolling scan. Self-transfers are excluded from movement/frequency indicators, source account strings are preserved, values stay separated by currency, and all money arithmetic uses an explicit 60-digit decimal context. Graph-derived rules remain unavailable in this phase; optional context rules are disabled or unavailable until their services exist.
 
 ## Inputs
 - Validated, label-free transactions available before the analysis cutoff.

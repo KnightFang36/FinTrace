@@ -46,7 +46,7 @@ def validate_policy(policy: dict) -> dict:
         "repeated_splitting": {"window_minutes", "minimum_related_payments"},
         "burst": {"window_minutes", "minimum_count", "history_days",
                   "minimum_complete_history_days", "baseline_multiplier"},
-        "dormant_activation": {"window_minutes", "observed_inactivity_days",
+        "dormant_activation": {"observed_inactivity_days",
                               "active_window_minutes", "minimum_count", "require_complete_observation_interval"},
     }
     for rule in ALL_RULES:
@@ -59,7 +59,7 @@ def validate_policy(policy: dict) -> dict:
             continue
         if set(settings) - {"enabled", *allowed[rule]}:
             raise ValueError(f"Unknown parameter for {rule}")
-        required = allowed[rule] - ({"window_minutes"} if rule == "dormant_activation" else set())
+        required = allowed[rule]
         if not required <= set(settings):
             raise ValueError(f"Missing parameter for {rule}")
         for key, value in settings.items():

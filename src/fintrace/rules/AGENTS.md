@@ -1,7 +1,7 @@
 # Deterministic transaction rules implementation instructions
 
 ## Purpose
-Own the source service described in `docs/features/transaction_rules/README.md`. Modules are placeholders until implemented.
+Own the source service described in docs/features/transaction_rules/README.md. The six core rules and snapshot evidence engine are implemented. Graph and optional verified-context rules remain separate later phases. No risk scoring or alert lifecycle belongs in this package.
 
 ## Inputs
 - Validated, label-free transactions available before the analysis cutoff.
@@ -19,6 +19,8 @@ Own the source service described in `docs/features/transaction_rules/README.md`.
 - Identify repeated splitting patterns without assuming a legal reporting threshold or proving intentional evasion.
 
 ## Module responsibilities
+- `policy.py`: Reject invalid active-rule parameters and enforce explicit execution/evidence budgets.
+- `common.py`: Exact arithmetic, stable findings, account scope, half-open windows and coverage checks.
 - `engine.py`: Rule eligibility, invocation and finding aggregation.
 - `pass_through.py`: FIFO-based observed-inflow forwarding evidence.
 - `fan_in.py`: Distinct-sender collection patterns.
