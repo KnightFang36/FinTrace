@@ -1,1 +1,1 @@
-"""Source provenance is available; transaction normalization remains pending."""
+"""Source audit, provenance, and chunked label-isolated IBM normalization."""

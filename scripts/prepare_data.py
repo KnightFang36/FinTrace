@@ -1,8 +1,9 @@
-"""Create or verify local IBM provenance; no download or normalization."""
+"""Audit, manifest, verify and normalize local IBM sources; no downloads."""
 
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import sys
 from pathlib import Path
@@ -47,6 +48,10 @@ def main(argv: list[str] | None = None) -> int:
     create.add_argument("--output", type=Path)
     verify = commands.add_parser("verify", help="Recompute hashes and check recorded source identity")
     verify.add_argument("manifest", type=Path)
+    ingest = commands.add_parser("ingest", help="Validate and normalize a manifested source into separate Parquet artifacts")
+    ingest.add_argument("manifest", type=Path)
+    ingest.add_argument("--processed-root", type=Path, default=ROOT / "data/processed")
+    ingest.add_argument("--batch-size", type=int, default=25000)
     args = parser.parse_args(argv)
     try:
         raw_root = args.raw_root.resolve(strict=True)
@@ -57,6 +62,15 @@ def main(argv: list[str] | None = None) -> int:
                 with args.output.open("x", encoding="utf-8") as handle:
                     handle.write(payload)
             print(payload, end="")
+            return 0
+        if args.command == "ingest":
+            from fintrace.ingestion.ibm import ingest_ibm
+            def progress(counts):
+                if counts["source_records"] % 250000 == 0:
+                    print(json.dumps({"progress": counts}), file=sys.stderr, flush=True)
+            result = ingest_ibm(args.manifest, raw_root, args.processed_root,
+                                batch_size=args.batch_size, progress=progress)
+            print(json.dumps(result, indent=2))
             return 0
         if args.command == "create":
             manifest = create_manifest(
@@ -75,7 +89,7 @@ def main(argv: list[str] | None = None) -> int:
             manifest = verify_manifest(args.manifest, raw_root)
             destination = args.manifest.resolve(strict=True)
             status = "verified"
-    except (ManifestError, OSError) as error:
+    except (ManifestError, OSError, ValueError, csv.Error) as error:
         print(f"Data preparation failed: {error}", file=sys.stderr)
         return 2
     print(json.dumps({

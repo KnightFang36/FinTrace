@@ -1,6 +1,6 @@
 # IBM ingestion
 
-**Status: source provenance/header verification is implemented; transaction normalization and label extraction remain pending.** Owner: `src/fintrace/ingestion/`.
+**Status: source provenance, upload auditing, transaction normalization and evaluation-label extraction are implemented.** Owner: `src/fintrace/ingestion/`.
 
 Available now in `manifest.py`: `inspect_source`, `create_manifest`, `validate_manifest`, `write_manifest`, `load_manifest`, and `verify_manifest`. The CLI and exact input/output semantics are documented in [the data workflow](../../../data/README.md). These functions inspect headers and bytes, not financial rows.
 
@@ -8,7 +8,9 @@ Available now in `manifest.py`: `inspect_source`, `create_manifest`, `validate_m
 ```text
 ingest_ibm(source_path, manifest, policy) -> IngestionResult
 ```
-This is a design signature, not an existing callable API. Concrete types must follow `docs/data_contracts.md`.
+Implemented interface: `ingest_ibm(manifest_path, raw_root, processed_root, *, batch_size=25000, progress=None) -> dict`. The return value is a completion inventory or an integrity-verified reuse result. It publishes detection artifacts under datasets/<dataset_id>/ and benchmark artifacts under evaluation/<dataset_id>/, with separate quality reports.
+
+The adapter streams CSV batches into decimal(38,8) Parquet, validates timestamps under the manifest policy, derives exact-key observed accounts, and retains duplicate financial records. Invalid financial rows are quarantined without their label column. Missing/invalid labels are recorded only in evaluation artifacts and do not reject otherwise valid financial rows. Irrecoverable CSV quoting errors abort the import without publishing a completed dataset. Manifest, source and artifact integrity are checked before completed data can be reused.
 
 ## Inputs
 - Immutable IBM CSV with verified positional header, dataset manifest and parsing policy.

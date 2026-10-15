@@ -1,6 +1,6 @@
 # Data foundation
 
-This folder separates immutable IBM source files, generated analysis artifacts, and optional verified references. **Provenance and upload auditing are implemented; transaction normalization and detection remain pending. Source datasets are local and excluded from Git.**
+This folder separates immutable IBM source files, generated analysis artifacts, and optional verified references. **Provenance, upload auditing and transaction normalization are implemented; detection remains pending. Source datasets are local and excluded from Git.**
 
 | Location | Input | Output / responsibility |
 | --- | --- | --- |
@@ -16,7 +16,7 @@ Run `python3 scripts/prepare_data.py --help` from the repository root. This stan
 
 It verifies the exact ordered IBM CSV header, preserving both columns named Account; computes a streaming SHA-256 hash and byte count; records acquisition/source terms and explicit IANA timezone interpretation; and writes a new manifest without replacing existing files. Verification recomputes the header and checksum. Sources remain inside the selected raw root; direct symbolic-link inputs and path traversal are rejected.
 
-It performs no downloads, transaction-row validation, value normalization, customer inference, label extraction, or detection. A matching local checksum establishes continuity with the recorded file, not publisher authenticity or completeness.
+The create/verify commands inspect source identity rather than financial row validity. The ingest command adds financial validation and Parquet normalization; none of these commands downloads data or performs detection. A matching local checksum establishes continuity with the recorded file, not publisher authenticity or completeness.
 
 ## Workflow
 
@@ -53,6 +53,22 @@ Create defaults to data/raw/ibm/manifest.json. Use --output for a new version; e
 
 ## Observation coverage and identity
 
+## Normalization
+
+After creating a valid manifest, install the declared data dependencies and run:
+
+```bash
+.venv/bin/python scripts/prepare_data.py ingest data/raw/ibm/manifest.json
+```
+
+Detection-facing artifacts are transactions.parquet, accounts.parquet, quarantine.parquet and quality.json under data/processed/datasets/<dataset_id>/. Benchmark labels, label errors and their own quality report are isolated under data/processed/evaluation/<dataset_id>/. No label or pattern annotation is supplied to financial validation or account derivation. An invalid benchmark label does not reject valid financial fields.
+
+The adapter uses bounded batches, exact decimal(38,8) values, stable source-record IDs, per-dataset locks and staged completion markers. Duplicate-content payments remain distinct and are counted in diagnostics. Repeating an import verifies sources and artifact hashes before returning a reused result. Observed account keys preserve both bank and account source strings. Publisher entity tables are not implicitly joined.
+
+The ingest command requires PyArrow and DuckDB. Audit/create/verify use only the standard library. A malformed CSV stream aborts publication; field-level financial errors go to quarantine. Historical eligibility remains unknown without independently declared coverage.
+
+## Coverage declarations
+
 No coverage is inferred from file dates or transaction minima/maxima. Omitted coverage produces an empty observation_intervals list meaning unknown coverage; historical rules must then remain unavailable.
 
 Use repeated --coverage START END declarations only for independently established observation horizons. Use --gap START END for known gaps. Endpoints require ISO timestamps with offsets; intervals are half-open, sorted and non-overlapping. When coverage is supplied, gaps must fall inside it. These declarations are metadata, not a statement that the source has been audited for every expected transaction.
@@ -71,4 +87,4 @@ python3 -m unittest discover -s tests/integration -p 'test_prepare_data_cli.py' 
 python3 scripts/check_scaffold.py
 ```
 
-Tests use temporary handcrafted examples, never actual IBM records. Detection-facing normalized files and evaluation-label separation remain implementation work for the ingestion branch.
+Tests use temporary handcrafted examples, never actual IBM records. Run the full implemented data test suite with `.venv/bin/python -m pytest tests -q`.
