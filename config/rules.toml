@@ -2,6 +2,14 @@
 schema_version = "1"
 policy_version = "demo-v1"
 
+[execution]
+# Snapshot evaluation is bounded; limits never silently sample transactions.
+max_input_transactions = 250000
+max_findings_per_rule = 10000
+max_evidence_transactions = 10000
+max_allocation_entries = 20000
+exclude_self_transfers = true
+
 [pass_through]
 enabled = true
 window_minutes = 60

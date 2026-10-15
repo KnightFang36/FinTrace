@@ -133,7 +133,7 @@ def main() -> int:
         f"{len(feature_directories)} feature contracts, "
         f"{len(python_files)} Python files, valid TOML and local links."
     )
-    print("Detection, persistence, exports and dashboard functionality remain unimplemented.")
+    print("Structure checks do not verify runtime functionality; run the implemented feature tests separately.")
     return 0
 
 

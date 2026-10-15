@@ -10,6 +10,8 @@ Repository files and declared local dataset/configuration paths.
 Diagnostics, exit codes and eventually auditable service invocations.
 
 ## Functionality
+run_rules.py delegates cutoff snapshot analysis to fintrace.rules.runner. It requires an explicit timezone-aware cutoff, accepts optional exact account keys, and uses the verified normalized detection artifact only. Input overflow fails; incomplete evidence is reported through rule coverage rather than sampled findings.
+
 check_scaffold.py validates directory instructions, local Markdown links including data READMEs, syntax, configuration consistency and the declared dependency boundary without downloading data. prepare_data.py delegates local source-header verification, hashing and manifest create/verify operations to fintrace.ingestion.manifest. Future operational scripts must also delegate to source services.
 
 ## Constraints
