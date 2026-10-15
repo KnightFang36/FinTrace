@@ -70,6 +70,21 @@ The ingest command requires PyArrow and DuckDB. Audit/create/verify use only the
 
 ## Coverage declarations
 
+## Supplemental publisher accounts
+
+After normalization, inventory the supplied synthetic entity table separately:
+
+```bash
+.venv/bin/python scripts/prepare_data.py accounts \
+  data/processed/datasets/<dataset_id>/accounts.parquet
+```
+
+Outputs under data/processed/supplemental/<snapshot_id>/ include publisher_accounts.parquet, account_link_candidates.parquet, quarantine.jsonl and completion.json. Synthetic entity names/IDs come directly from the supplied file. They are source metadata, not independently verified KYC or source-of-wealth information.
+
+Link statuses are exact_source_key, zero_padding_candidate, ambiguous and unmatched. Numeric leading-zero equivalence is diagnostic only, with both source bank IDs retained; no link is automatically applied to detection account keys. Candidate conflicts remain explicit. Repeated runs verify and reuse completed snapshots. Patterns are not an input to this operation.
+
+## Historical coverage
+
 No coverage is inferred from file dates or transaction minima/maxima. Omitted coverage produces an empty observation_intervals list meaning unknown coverage; historical rules must then remain unavailable.
 
 Use repeated --coverage START END declarations only for independently established observation horizons. Use --gap START END for known gaps. Endpoints require ISO timestamps with offsets; intervals are half-open, sorted and non-overlapping. When coverage is supplied, gaps must fall inside it. These declarations are metadata, not a statement that the source has been audited for every expected transaction.

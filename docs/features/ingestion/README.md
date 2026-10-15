@@ -38,3 +38,5 @@ The adapter streams CSV batches into decimal(38,8) Parquet, validates timestamps
 
 ## Data availability
 Supported by IBM transaction exports after schema and source interpretation are verified.
+
+Separately supplied HI-Small_accounts.csv may be preserved by reconcile_publisher_accounts. Its Bank ID strings can differ in zero padding from transaction bank IDs. The output records exact matches, explicit numeric zero-padding candidates, ambiguities and missing links. Synthetic source entity metadata is retained separately and is not inferred from transaction IDs. Publisher pattern files remain evaluation-only.

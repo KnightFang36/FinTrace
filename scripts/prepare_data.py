@@ -53,9 +53,20 @@ def main(argv: list[str] | None = None) -> int:
     ingest.add_argument("manifest", type=Path)
     ingest.add_argument("--processed-root", type=Path, default=ROOT / "data/processed")
     ingest.add_argument("--batch-size", type=int, default=25000)
+    accounts = commands.add_parser("accounts", help="Preserve publisher metadata and report review-only account links")
+    accounts.add_argument("observed_accounts", type=Path)
+    accounts.add_argument("--source", default="HI-Small_accounts.csv")
+    accounts.add_argument("--processed-root", type=Path, default=ROOT / "data/processed")
     args = parser.parse_args(argv)
     try:
         raw_root = args.raw_root.resolve(strict=True)
+        if args.command == "accounts":
+            from fintrace.ingestion.publisher import reconcile_publisher_accounts
+            from fintrace.ingestion.manifest import _source_path
+            result = reconcile_publisher_accounts(_source_path(raw_root, args.source), raw_root,
+                                                 args.observed_accounts, args.processed_root)
+            print(json.dumps(result, indent=2))
+            return 0
         if args.command == "audit":
             report = audit_sources(raw_root, args.transactions, args.accounts, args.patterns)
             payload = json.dumps(report, indent=2) + "\n"
