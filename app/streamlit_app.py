@@ -81,6 +81,9 @@ with st.sidebar:
     st.caption(f"Scoring policy: {model['snapshot']['policy']['policy_version']}")
     with st.expander("Snapshot identity"):
         st.code(identifier["id"], language=None)
+        datasets = sorted({item["dataset_id"] for item in model["priorities"].values()})
+        for dataset in datasets:
+            st.caption(f"Dataset: {dataset}")
     st.caption("Cases, report workflows, replay and benchmark evaluation are pending.")
 
 if message := st.session_state.pop("review_saved", None):

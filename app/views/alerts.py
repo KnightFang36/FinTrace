@@ -1,5 +1,6 @@
 """Filter review incidents, inspect evidence, and submit explicit audited actions."""
 from datetime import datetime, timezone
+import json
 import streamlit as st
 from app.components.filters import account_label, humanize
 from fintrace.investigations.dashboard import filter_alerts, get_audit
@@ -9,7 +10,11 @@ from fintrace.storage.alert_store import AlertStore
 def render_finding(finding):
     st.write(finding["explanation"])
     st.caption(f"{finding['rule_id']} · {finding['rule_version']} · {finding['window_start']} → {finding['window_end']} (exclusive)")
-    st.code("\n".join(finding["transaction_ids"]), language=None)
+    st.caption(f"Showing {min(200, len(finding['transaction_ids']))} of {len(finding['transaction_ids'])} transaction references.")
+    st.code("\n".join(finding["transaction_ids"][:200]), language=None, height=180)
+    st.download_button("Download finding evidence (JSON)", json.dumps(finding, indent=2),
+                       file_name=f"finding-{finding['finding_id']}.json", mime="application/json",
+                       key="download_" + finding["finding_id"])
     left, right = st.columns(2)
     with left:
         st.caption("Observed measurements")

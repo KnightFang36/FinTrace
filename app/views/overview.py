@@ -18,7 +18,7 @@ def render(model):
         with st.container(border=True):
             st.subheader("Priority distribution")
             st.bar_chart([{ "Band": humanize(band), "Accounts": count} for band, count in summary["by_band"].items()],
-                         x="Band", y="Accounts", color="#149d99", height=260)
+                         x="Band", y="Accounts", color="#149d99", sort=False, height=260)
             st.caption("Fixed policy points, capped at 100. Scores are investigation priorities, not probabilities.")
     with right:
         with st.container(border=True):
