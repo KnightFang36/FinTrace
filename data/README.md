@@ -1,6 +1,6 @@
 # Data foundation
 
-This folder separates immutable IBM source files, generated analysis artifacts, and optional verified references. **The provenance tool is implemented; transaction normalization and detection are not. No IBM dataset files have been acquired or included.**
+This folder separates immutable IBM source files, generated analysis artifacts, and optional verified references. **Provenance and upload auditing are implemented; transaction normalization and detection remain pending. Source datasets are local and excluded from Git.**
 
 | Location | Input | Output / responsibility |
 | --- | --- | --- |
@@ -19,6 +19,15 @@ It verifies the exact ordered IBM CSV header, preserving both columns named Acco
 It performs no downloads, transaction-row validation, value normalization, customer inference, label extraction, or detection. A matching local checksum establishes continuity with the recorded file, not publisher authenticity or completeness.
 
 ## Workflow
+
+Before creating a manifest, inventory the transaction CSV and optional supplemental files without inferring their timezone or acquisition date:
+
+```bash
+python3 scripts/prepare_data.py audit --accounts HI-Small_accounts.csv --patterns Pattern.txt \
+  --output data/raw/ibm/upload-audit.json
+```
+
+The audit streams all CSV records, verifies source headers and checksums, counts malformed row widths and pattern-block boundaries, and reports source timestamp strings and payment categories. This is not financial validation or proof of complete observation coverage. The output destination must be new. Pattern metadata remains explicitly evaluation-only.
 
 1. Acquire HI-Small separately from the publisher-linked distribution in [the dataset guide](../docs/dataset.md).
 2. Place the original transaction CSV inside data/raw/ibm without editing it.

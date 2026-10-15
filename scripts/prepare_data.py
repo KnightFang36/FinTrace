@@ -18,6 +18,7 @@ from fintrace.ingestion.manifest import (  # noqa: E402
     verify_manifest,
     write_manifest,
 )
+from fintrace.ingestion.audit import audit_sources
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -27,6 +28,11 @@ def main(argv: list[str] | None = None) -> int:
         help="Source directory; defaults to this repository's data/raw/ibm",
     )
     commands = parser.add_subparsers(dest="command", required=True)
+    audit = commands.add_parser("audit", help="Inventory local uploads without inferring timezone or acquisition time")
+    audit.add_argument("--transactions", default="HI-Small_Trans.csv")
+    audit.add_argument("--accounts")
+    audit.add_argument("--patterns")
+    audit.add_argument("--output", type=Path)
     create = commands.add_parser("create", help="Verify a local CSV and publish a new manifest")
     create.add_argument("source", type=Path)
     create.add_argument("--variant", choices=VARIANTS, required=True)
@@ -44,6 +50,14 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         raw_root = args.raw_root.resolve(strict=True)
+        if args.command == "audit":
+            report = audit_sources(raw_root, args.transactions, args.accounts, args.patterns)
+            payload = json.dumps(report, indent=2) + "\n"
+            if args.output:
+                with args.output.open("x", encoding="utf-8") as handle:
+                    handle.write(payload)
+            print(payload, end="")
+            return 0
         if args.command == "create":
             manifest = create_manifest(
                 args.source, raw_root, variant=args.variant, acquired_at=args.acquired_at,

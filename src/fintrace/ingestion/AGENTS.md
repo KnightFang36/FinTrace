@@ -18,6 +18,7 @@ Own the source service described in `docs/features/ingestion/README.md`. Source 
 - Extract laundering labels into a physically separate evaluation artifact; never return them in detector records.
 
 ## Module responsibilities
+- `audit.py`: Read-only source inventory, supplemental headers/checksums, record counts and evaluation-only pattern-block diagnostics. Never infer timezone, acquisition date or complete coverage.
 - `ibm.py`: Positional IBM CSV normalization and source-label separation.
 - `manifest.py`: Source hashes, provenance, timestamp interpretation and observation coverage.
 

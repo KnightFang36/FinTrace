@@ -1,6 +1,6 @@
 # IBM synthetic transaction sources
 
-Expected local input: HI-Small_Trans.csv from the publisher-linked distribution. There is no benchmark file in this repository.
+Expected local input: HI-Small_Trans.csv from the publisher-linked distribution. Actual datasets stay local and are not tracked by Git. Optional uploads may include HI-Small_accounts.csv and Pattern.txt.
 
 The provenance tool requires this exact ordered header, including duplicate Account fields:
 
