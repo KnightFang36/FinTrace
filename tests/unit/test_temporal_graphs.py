@@ -152,3 +152,11 @@ def test_seed_scope_and_empty_graph_are_explicit():
     assert result.artifact["coverage"]["layering"]["missing_seeds"] == [AccountKey("1", "MISSING")]
     with pytest.raises(ValueError, match="seed budget"):
         analyze_graph([], [AccountKey("1", "A"), AccountKey("1", "B")], policy(max_seed_accounts=1), CUTOFF, dataset_id="empty")
+
+
+def test_automatic_origins_use_declared_outgoing_count_ranking():
+    rows = [tx("a", "Z", "B", "00:01"), tx("b", "Z", "C", "00:02"), tx("c", "A", "D", "00:03")]
+    result = run(rows, max_seed_accounts=1)
+    coverage = result.artifact["coverage"]["layering"]
+    assert coverage["seeds_searched"] == [AccountKey("1", "Z")]
+    assert coverage["seed_scope"] == "outgoing_edge_count_descending_then_bank_account"

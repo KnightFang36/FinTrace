@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 import networkx as nx
 
-from fintrace.contracts import AccountKey, Finding, canonical_json, content_id, json_value
+from fintrace.contracts import AccountKey, Finding, content_id, json_value
 from fintrace.graph.builder import build_account_summary, build_transaction_graph
 from fintrace.graph.communities import find_communities
 from fintrace.graph.coordinated_groups import find_coordinated_groups
@@ -32,20 +32,21 @@ def analyze_graph(transactions, seed_accounts, graph_policy, cutoff, *, dataset_
     if len(supplied) > policy["max_seed_accounts"]:
         raise ValueError("Graph seed budget exceeded")
     missing = [seed for seed in supplied if seed not in graph]
-    seeds = [seed for seed in supplied if seed in graph] if supplied else sorted(graph)
+    seeds = [seed for seed in supplied if seed in graph] if supplied else sorted(graph, key=lambda node: (-graph.out_degree(node), node))
     seed_partial = not supplied and len(seeds) > policy["max_seed_accounts"]
     seeds = seeds[:policy["max_seed_accounts"]]
     identity = {"engine": ENGINE_VERSION, "networkx_version": nx.__version__, "policy": policy,
                 "dataset_id": graph.graph["dataset_id"], "cutoff": graph.graph["cutoff"],
                 "input": sorted((data["transaction"] for *_, data in graph.edges(data=True)),
                                 key=lambda item: item.transaction_id),
-                "excluded_self_transfers": graph.graph["excluded_self_transfers"], "seeds": supplied}
+                "excluded_self_transfers": graph.graph["excluded_self_transfers"], "seeds": supplied,
+                "selected_origins": seeds, "origin_ranking": "outgoing_edge_count_descending_then_bank_account"}
     run_id = "graphs-" + content_id(identity)
     paths, path_coverage = find_temporal_paths(graph, seeds, policy)
     cycles, cycle_coverage = find_temporal_cycles(graph, seeds, policy)
     groups, group_coverage = find_coordinated_groups(graph, policy)
     for coverage in (path_coverage, cycle_coverage):
-        coverage["seed_scope"] = "explicit_origins" if supplied else "sorted_account_prefix"
+        coverage["seed_scope"] = "explicit_origins" if supplied else "outgoing_edge_count_descending_then_bank_account"
         coverage["seeds_searched"] = seeds
         coverage["missing_seeds"] = missing
         if seed_partial:
