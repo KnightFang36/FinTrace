@@ -1,6 +1,6 @@
 # Implementation roadmap
 
-The current deliverable is a scaffold. None of the phases below is completed by the existence of placeholder modules.
+The data branch implements source auditing, versioned manifests, financial-row validation, chunked Parquet normalization, observed accounts, quarantine, label isolation and publisher-account link diagnostics. Phase 1's data artifact boundary is implemented; general workflow/case persistence remains a later service. Detection phases are still pending.
 
 | Phase | Deliverables | Completion evidence |
 | --- | --- | --- |

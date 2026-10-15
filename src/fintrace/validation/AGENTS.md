@@ -1,7 +1,7 @@
 # Financial data validation implementation instructions
 
 ## Purpose
-Own the source service described in `docs/features/validation/README.md`. Modules are placeholders until implemented.
+Own the source service described in `docs/features/validation/README.md`. Financial source-row validation is implemented in transactions.py; complete analysis-window eligibility remains a later service concern. Keep the benchmark label outside the validator's inputs.
 
 ## Inputs
 - Normalized candidate transactions with source references.

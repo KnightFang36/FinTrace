@@ -1,1 +1,1 @@
-"""ingestion: planned FinTrace service package; implementation pending."""
+"""Source audit, provenance, and chunked label-isolated IBM normalization."""

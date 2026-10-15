@@ -1,6 +1,8 @@
 # Financial data validation
 
-**Status: implementation pending.** Owner: `src/fintrace/validation/`.
+**Status: financial source-row validation is implemented.** Owner: `src/fintrace/validation/`.
+
+Available: `validate_transaction_fields(fields, *, timezone_policy, timestamp_precision) -> RowValidation`. It accepts only the ten financial fields, excluding the benchmark label. It preserves exact identifier and currency strings, validates positive fixed-point amounts exactly representable by decimal(38,8), rejects ambiguous/nonexistent local times, and returns either a normalized record or field-specific errors. Unmapped payment formats are preserved with a warning. It does not infer account balances or history completeness.
 
 ## Proposed interface
 ```text

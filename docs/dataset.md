@@ -4,7 +4,7 @@
 Use the Kaggle distribution linked by [IBM AML-Data](https://github.com/IBM/AML-Data):
 [IBM Transactions for Anti Money Laundering](https://www.kaggle.com/datasets/ealtman2019/ibm-transactions-for-anti-money-laundering-aml).
 
-The initial planned variant is HI-Small. No source data is included here. Download access may require an account or acceptance of source terms; record those conditions. Never embed credentials in scripts or documentation.
+The initial variant is HI-Small. Source data stays local and is not included in Git. Download access may require an account or acceptance of source terms; record those conditions. Never embed credentials in scripts or documentation. Implemented audit, manifest, verify, normalization and publisher-account commands are documented in [data/README.md](../data/README.md).
 
 IBM describes the data as fully synthetic and identifies the data license as CDLA-Sharing-1.0, separately from the repository code license. Keep acquisition and redistribution decisions tied to the exact downloaded files.
 
@@ -18,7 +18,7 @@ Timestamp,From Bank,Account,To Bank,Account,Amount Received,Receiving Currency,A
 Stop on an incompatible header rather than guessing. A CSV reader may rename duplicate fields; positional verification must happen before relying on renamed columns.
 
 ## Supported observations
-The export supports transfer endpoints, bank identities, times, amounts, currencies, payment formats and separate laundering labels. It does not prove customer identity, intent, verified ownership, account age, source of wealth or balances.
+The transaction export supports transfer endpoints, bank identities, times, amounts, currencies, payment formats and separate laundering labels. A separately supplied accounts CSV contains synthetic entity IDs/names; preserve it separately with source provenance and explicit link diagnostics. Neither file proves real customer identity, intent, verified ownership, account age, source of wealth or balances.
 
 Accounts can be derived from endpoints. Customer records cannot be recovered from account IDs. Currency changes and amount differences do not establish fees or exchange rates.
 

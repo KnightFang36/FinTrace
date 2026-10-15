@@ -10,7 +10,7 @@ HI-Small transaction CSV, acquisition manifest and optional publisher pattern an
 Verified source file references consumed by ingestion; pattern annotations consumed only by evaluation.
 
 ## Functionality
-Validate the ordered header with its two Account columns, preserve original record order and record the exact dataset variant and source terms.
+Use scripts/prepare_data.py to validate the ordered header with its two Account columns, hash original bytes and record the exact dataset variant, acquisition/source terms, explicit source timezone/precision and observation declarations. See README.md and data/README.md. The tool never overwrites an existing manifest or infers complete history from observed timestamps.
 
 ## Constraints
 No data is bundled by this scaffold. Treat all records as synthetic. Do not pass Is Laundering or pattern annotations to detectors. Raw files stay immutable and ignored.

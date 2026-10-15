@@ -13,4 +13,4 @@ The fintrace package.
 Keep domain services under fintrace and shared records in its contracts module. Do not place UI or bulk data here.
 
 ## Constraints
-Respect deeper folder instructions. The current files are planned service placeholders. Avoid import-time side effects or network requests.
+Respect deeper folder instructions and module implementation status. Ingestion/source auditing and financial validation are implemented; most downstream services remain placeholders. Avoid import-time side effects or network requests.

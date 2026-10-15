@@ -1,6 +1,6 @@
 # Shared data contracts
 
-All schemas below are planned. Names and constraints must be implemented and verified before being advertised as available APIs.
+Source manifests, normalized transaction/account records and ingestion validation artifacts are implemented. Detection findings, scores, alerts, cases and other downstream records remain planned and must be implemented before being advertised as available APIs.
 
 ## Common conventions
 - Identifiers are strings. Account keys contain separate `bank_id` and `account_id` components.
@@ -13,9 +13,11 @@ All schemas below are planned. Names and constraints must be implemented and ver
 ## DatasetManifest
 Input: manually supplied provenance plus file metadata computed at ingestion.
 
-Fields: `dataset_id`, `variant`, `source_url`, `acquired_at`, `source_files[]` with relative path/hash/byte count, `source_terms`, `timezone_policy`, `timestamp_precision`, `observation_intervals[]`, `known_gaps[]`, `normalization_version`.
+Implemented source-manifest fields: `schema_version`, `dataset_id`, `variant`, `synthetic`, `source_url`, `acquired_at`, `source_files[]` with `relative_path`, `sha256`, `byte_count` and exact ordered `header`, `source_terms`, `timezone_policy`, `timestamp_precision`, `observation_intervals[]`, `known_gaps[]`, `normalization_version`. See [the version-1 schema](../data/manifest.schema.json) and [data workflow](../data/README.md). Version 1 supports one CSV; optional benchmark annotations require their own future provenance contract.
 
 Output: immutable manifest and reproducible source identity. An unset timezone policy blocks timestamp-dependent analysis. Coverage may be declared unknown; history-dependent features then remain unavailable.
+
+Version 2 additionally records observed_at and timezone_policy_basis. acquired_at may be null when unknown; observed_at is the tool's actual local observation instant, not a replacement acquisition date. The timezone basis is project_convention or publisher_declared. The basis participates in dataset identity; observation/acquisition times do not. See [the version-2 schema](../data/manifest.v2.schema.json).
 
 ## Transaction
 Inputs: verified positional IBM source columns.
@@ -38,10 +40,17 @@ Additional fields: `transaction_id`, `dataset_id`, `source_file_id`, `source_rec
 
 Self-transfers are retained and annotated. They are not automatically suspicious. Duplicate content is reported, not silently dropped.
 
+Implemented Parquet amounts are decimal(38,8); values outside that exact representation are quarantined without rounding. occurred_at is UTC under the explicit manifest interpretation, and timestamp_precision preserves the source granularity. source_row_hash hashes only the ten financial source fields, excluding the label. Financially valid records with an absent/invalid benchmark label remain accepted; label issues are isolated in evaluation outputs.
+
 ## ObservedAccount
 Fields: structured account key, `first_observed_at`, `last_observed_at`, `observed_currencies[]`, `source_endpoint_roles[]`.
 
 These are observation facts, not verified opening date, customer identity, account balance or ownership. Optional `customer_id` is null until a separate verified table supplies it.
+
+## PublisherAccount and AccountLinkCandidate
+The optional publisher registry preserves Bank Name, Bank ID, Account Number, Entity ID and Entity Name as exact strings, with source checksum/record number, schema/run/source-dataset identity and synthetic=true. It is stored separately from observed detection accounts.
+
+Candidate links preserve both observed and publisher bank IDs. Status is exact_source_key, zero_padding_candidate, ambiguous or unmatched; candidate_count exposes conflicts. Numeric zero-padding equivalence is an explicit diagnostic and does not rewrite account keys or establish verified identity. Pattern annotations and transaction laundering labels are never inputs to this join.
 
 ## OptionalCustomer and EntityLink
 Customer fields: `customer_id`, `entity_type`, `name`, `jurisdiction`, `expected_activity_policy`, `source_id`, `effective_from`, `effective_to`, `observed_at`. All unprovided attributes remain null.
