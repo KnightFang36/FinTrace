@@ -30,6 +30,7 @@ def main(argv=None):
     commands.add_parser("list")
     args = parser.parse_args(argv)
     try:
+        import duckdb
         if args.command == "import":
             from fintrace.alerts.runner import import_analysis
             result = import_analysis(args.rules_run, args.graph_run, args.scoring_policy, args.alert_policy,
@@ -45,7 +46,7 @@ def main(argv=None):
     except ImportError as error:
         print(f"Alert dependencies unavailable: {error}. Install config/data-requirements.txt", file=sys.stderr)
         return 2
-    except (ValueError, OSError, KeyError) as error:
+    except (ValueError, OSError, KeyError, duckdb.Error) as error:
         print(f"Alert operation failed: {error}", file=sys.stderr)
         return 2
     print(json.dumps(result, indent=2, sort_keys=True))

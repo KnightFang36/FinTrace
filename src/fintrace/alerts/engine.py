@@ -32,6 +32,8 @@ def build_alerts(findings, priorities, existing_alerts, alert_policy, *, actor, 
     its last evidence interval instant; it is never split into unsupported fragments.
     """
     policy = validate_alert_policy(alert_policy)
+    if not isinstance(actor, str) or not actor.strip():
+        raise ValueError("Audit actor is required")
     findings = unique_findings(findings)
     validate_priority_snapshot(priorities)
     at = utc_instant(at)
@@ -117,7 +119,7 @@ def build_alerts(findings, priorities, existing_alerts, alert_policy, *, actor, 
 
 
 def transition_alert(alert, new_state, *, actor, at, reason, expected_version, reopen=False):
-    if expected_version != alert["version"]:
+    if type(expected_version) is not int or expected_version != alert["version"]:
         raise ValueError("Stale alert version")
     allowed = {"open": {"in_review"}, "in_review": {"escalated", "closed"}, "escalated": {"in_review", "closed"}, "closed": set()}
     previous = alert["state"]

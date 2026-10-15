@@ -4,7 +4,7 @@ import tomllib
 from pathlib import Path
 from datetime import timedelta
 
-from fintrace.contracts import utc_instant
+from fintrace.contracts import parse_finding, utc_instant
 from fintrace.rules.runner import _hash
 from fintrace.scoring.priority import load_scoring_policy, score_accounts
 from fintrace.storage.alert_store import AlertStore
@@ -45,6 +45,13 @@ def load_analysis_run(directory, kind):
     hashes = marker.get("input_hashes")
     if not isinstance(hashes, dict) or set(hashes) != {"transactions.parquet", "quality.json"}:
         raise ValueError("Detection input identities are required")
+    for value in payload["findings"]:
+        finding = parse_finding(value)
+        if finding.dataset_id != payload["dataset_id"] or finding.cutoff != utc_instant(payload["cutoff"]):
+            raise ValueError("Finding dataset/cutoff conflicts with detection run")
+        version = expected_engine + ":" + payload["policy_version"] + "@" + payload["policy_hash"][:16]
+        if finding.rule_version != version:
+            raise ValueError("Finding policy identity conflicts with detection run")
     return payload, marker
 
 

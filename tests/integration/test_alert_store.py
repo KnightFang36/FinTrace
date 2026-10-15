@@ -159,3 +159,27 @@ def test_cli_import_list_and_audited_transition(analysis_runs, tmp_path):
                                           "--actor", "fixture-reviewer", "--at", END.isoformat(), "--reason", "Review started"], capture_output=True, text=True)
     assert transitioned.returncode == 0, transitioned.stderr
     assert json.loads(transitioned.stdout)["state"] == "in_review"
+
+
+def test_finding_identity_must_match_frozen_run_even_if_checksum_updated(analysis_runs, tmp_path):
+    rules, graphs = analysis_runs
+    graph_path = graphs / "graph.json"
+    payload = json.loads(graph_path.read_text())
+    payload["findings"][0]["dataset_id"] = "other"
+    graph_path.write_text(canonical_json(payload))
+    marker_path = graphs / "run.json"
+    marker = json.loads(marker_path.read_text())
+    marker["artifacts"]["graph.json"] = _hash(graph_path)
+    marker_path.write_text(canonical_json(marker))
+    with pytest.raises(ValueError, match="conflicts"):
+        import_analysis(rules, graphs, ROOT / "config/scoring.toml", ROOT / "config/alerts.toml", tmp_path / "alerts.duckdb", actor="test", at=END)
+    assert not (tmp_path / "alerts.duckdb").exists()
+
+
+def test_cli_reports_corrupt_database_without_traceback(tmp_path):
+    database = tmp_path / "broken.duckdb"
+    database.write_bytes(b"corrupt database")
+    result = subprocess.run([sys.executable, str(ROOT / "scripts/manage_alerts.py"), "--database", str(database), "list"], capture_output=True, text=True)
+    assert result.returncode == 2
+    assert "Alert operation failed" in result.stderr
+    assert "Traceback" not in result.stderr

@@ -175,6 +175,8 @@ def parse_finding(value) -> Finding:
     for name in ("finding_id", "rule_id", "rule_version", "dataset_id", "explanation"):
         if not isinstance(data[name], str) or not data[name].strip():
             raise ValueError(f"Finding {name} must be non-empty text")
+    if not isinstance(data["subject_accounts"], (tuple, list)) or not isinstance(data["subject_roles"], (tuple, list)):
+        raise ValueError("Finding subjects and roles must be sequences")
     data["subject_accounts"] = tuple(
         item if isinstance(item, AccountKey) else AccountKey(**item) for item in data["subject_accounts"]
     )

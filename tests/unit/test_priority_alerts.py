@@ -149,3 +149,18 @@ def test_import_before_cutoff_and_missing_priority_rejected():
         build_alerts([finding()], score([finding()]), [], alert_policy(), actor="test", at=START)
     with pytest.raises(ValueError, match="matching priority"):
         changes([finding()], priorities=score([]))
+
+
+def test_actor_is_required_even_for_empty_import():
+    with pytest.raises(ValueError, match="actor"):
+        build_alerts([], score([]), [], alert_policy(), actor="", at=END)
+
+
+def test_priority_arithmetic_is_validated_even_with_recomputed_hashes():
+    snapshot = score([finding()])
+    account = snapshot["accounts"][0]
+    account["score"] = 100
+    account["priority_id"] = content_id({key: value for key, value in account.items() if key != "priority_id"})
+    snapshot["snapshot_id"] = "priorities-" + content_id({key: value for key, value in snapshot.items() if key != "snapshot_id"})
+    with pytest.raises(ValueError, match="arithmetic"):
+        validate_priority_snapshot(snapshot)
