@@ -1,0 +1,5 @@
+schema_version = "1"
+policy_version = "alerts-demo-v1"
+incident_window_minutes = 1440
+minimum_priority = 0
+# Alerts are local review records, never automated account restrictions.
