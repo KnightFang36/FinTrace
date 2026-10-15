@@ -21,6 +21,7 @@ Own the source service described in docs/features/transaction_rules/README.md. T
 ## Module responsibilities
 - `policy.py`: Reject invalid active-rule parameters and enforce explicit execution/evidence budgets.
 - `common.py`: Exact arithmetic, stable findings, account scope, half-open windows and coverage checks.
+- `runner.py`: Verify completed detection artifacts, project only label-free columns, enforce unsampled input limits and publish reproducible JSON snapshot outputs. Never open evaluation files or pattern annotations.
 - `engine.py`: Rule eligibility, invocation and finding aggregation.
 - `pass_through.py`: FIFO-based observed-inflow forwarding evidence.
 - `fan_in.py`: Distinct-sender collection patterns.
