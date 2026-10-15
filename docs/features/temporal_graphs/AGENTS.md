@@ -1,7 +1,7 @@
 # Temporal graph analysis contract instructions
 
 ## Purpose
-Maintain the authoritative contract in `README.md` for `src/fintrace/graph/`. Implementation is pending.
+Maintain the authoritative contract in `README.md` for `src/fintrace/graph/`. Core analysis, snapshot publication and bounded PNG rendering are implemented; reference exposure remains pending.
 
 ## Inputs
 - Validated label-free transfers, account keys, explicit time interval and currency policy.

@@ -110,3 +110,5 @@ A positive transaction label is not a confirmed mule label for either endpoint. 
 Run fields: run ID, dataset/configuration/software identity, cutoff, start/end, completion status, per-feature coverage, artifact hashes.
 
 Checkpoint fields: replay ID, dataset/configuration identity, last processed event ordering key, watermark, processed counts and persisted artifact references. Reject resume against changed inputs or policies.
+
+Implemented graph snapshots use schema_version 1 and temporal-graphs-v1. graph.json includes edges with transaction IDs, findings, per-feature work/budget coverage, currency-specific context, source timestamp assumptions and visualization limits. Path/cycle transaction IDs remain chronological rather than sorted lexically. Seeds constrain origins only; group and metric scope is the entire loaded interval.
