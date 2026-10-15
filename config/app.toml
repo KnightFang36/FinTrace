@@ -1,0 +1,32 @@
+# Illustrative configuration; application services are not implemented yet.
+schema_version = "1"
+[dataset]
+variant = "HI-Small"
+raw_directory = "data/raw/ibm"
+processed_directory = "data/processed"
+# Required before ingestion: no inferred timezone.
+timezone_policy = "UNSET"
+
+[analysis]
+timestamp_ties = "exclude_from_temporal_chains"
+currency_policy = "separate"
+insufficient_history_policy = "mark_unavailable"
+
+[graph]
+max_hops = 4
+max_cycle_length = 5
+max_seed_accounts = 20
+max_search_edges = 50000
+max_expansions = 100000
+max_search_seconds = 10
+max_display_nodes = 200
+max_display_edges = 500
+layout_seed = 42
+
+[storage]
+database_path = "data/processed/fintrace.duckdb"
+export_directory = "outputs"
+
+[optional]
+entity_context_enabled = false
+screening_enabled = false

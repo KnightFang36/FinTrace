@@ -1,0 +1,73 @@
+# Demonstration thresholds only. Version and review before applying.
+schema_version = "1"
+policy_version = "demo-v1"
+
+[pass_through]
+enabled = true
+window_minutes = 60
+minimum_incoming_count = 3
+minimum_forwarded_ratio = "0.80"
+allocation_method = "fifo_observed_inflows"
+require_strict_time_order = true
+
+[fan_in]
+enabled = true
+window_minutes = 60
+minimum_distinct_senders = 8
+
+[fan_out]
+enabled = true
+window_minutes = 60
+minimum_distinct_recipients = 8
+
+[burst]
+enabled = true
+window_minutes = 60
+minimum_count = 20
+history_days = 7
+minimum_complete_history_days = 7
+baseline_multiplier = "4.0"
+
+[dormant_activation]
+enabled = true
+observed_inactivity_days = 7
+active_window_minutes = 120
+minimum_count = 10
+require_complete_observation_interval = true
+
+[repeated_splitting]
+enabled = true
+window_minutes = 60
+minimum_related_payments = 5
+# No legal/reporting threshold is inferred.
+
+[layering]
+enabled = true
+window_minutes = 180
+minimum_hops = 3
+maximum_hops = 4
+require_strict_time_order = true
+
+[circular_flow]
+enabled = true
+window_minutes = 180
+minimum_cycle_length = 2
+maximum_cycle_length = 5
+require_strict_time_order = true
+
+[coordinated_group]
+enabled = true
+window_minutes = 60
+minimum_accounts = 3
+minimum_repeated_windows = 2
+
+[cash_out]
+enabled = false
+# Enable only after an explicit, verified payment-format/exit mapping exists.
+
+[profile_mismatch]
+enabled = false
+
+[known_exposure]
+enabled = false
+# Requires dated independent reference intelligence, never benchmark labels.

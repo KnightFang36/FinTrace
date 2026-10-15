@@ -1,0 +1,32 @@
+# Fixed policy points; no fitted parameters or probability interpretation.
+schema_version = "1"
+policy_version = "demo-v1"
+maximum_score = 100
+low_minimum = 0
+medium_minimum = 30
+high_minimum = 60
+critical_minimum = 80
+
+# Each family contributes at most once per account and scoring window.
+# Correlated findings share a family; select the highest eligible contribution.
+[families.pass_through]
+weight = 25
+rules = ["pass_through"]
+
+[families.collection_dispersal]
+weight = 15
+rules = ["fan_in", "fan_out", "repeated_splitting"]
+
+[families.temporal_network]
+weight = 30
+rules = ["layering", "circular_flow"]
+
+[families.activity_change]
+weight = 15
+rules = ["burst", "dormant_activation"]
+
+[families.coordination]
+weight = 15
+rules = ["coordinated_group"]
+
+# Optional context is evidence-only until its own scoring policy is approved.

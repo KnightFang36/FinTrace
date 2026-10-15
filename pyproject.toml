@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fintrace"
+version = "0.1.0"
+description = "Rule-based and temporal-graph investigation of IBM synthetic AML transactions"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "pandas",
+  "networkx",
+  "matplotlib",
+  "streamlit",
+  "duckdb",
+  "pyarrow",
+  "pyvis",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

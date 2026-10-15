@@ -1,0 +1,61 @@
+# Deterministic transaction rules
+
+**Status: implementation pending.** Owner: `src/fintrace/rules/`.
+
+## Proposed interface
+```text
+evaluate_rules(transactions, history, policy, cutoff, context=None) -> RuleResult
+```
+This is a design signature, not an existing callable API. Concrete types must follow `docs/data_contracts.md`.
+
+## Inputs
+- Validated, label-free transactions available before the analysis cutoff.
+- Versioned rules, known observation intervals and optional verified context.
+
+## Outputs
+- Findings with affected account roles, rule measurements, thresholds, transaction IDs and limitations.
+- A per-rule coverage result, including disabled, unavailable and evaluated-with-no-finding.
+
+## Functionality
+- Evaluate pass-through with an explicitly declared FIFO allocation of observed same-currency inflows; never allocate an inflow more than once within one account/window evaluation.
+- Count distinct counterparties for fan-in/out; record each payment separately for frequency.
+- Compare bursts with eligible complete historical windows, excluding the active window; reject a zero or unavailable baseline instead of dividing by it.
+- Require sufficient prior observation for inactivity indicators; first appearance alone is not reactivation.
+- Identify repeated splitting patterns without assuming a legal reporting threshold or proving intentional evasion.
+
+## Errors and edge cases
+- Missing history makes historical rules unavailable, not negative.
+- Cross-currency attribution is unavailable without explicit dated conversion data.
+- Unsupported cash-out mappings or customer context disable the corresponding rule.
+
+## Acceptance criteria
+- Incoming transfers followed by eligible forwarding generate an auditable allocated-value ledger.
+- Outflows preceding inflows cannot create pass-through evidence.
+- A legitimate repeated payroll example can trigger a pattern finding but must remain described as requiring contextual review.
+
+## Data availability
+Core rules supported; cash-out and profile mismatch are gated by additional verified inputs.
+
+## Rule-specific contracts
+
+All windows exclude records at or after their end/cutoff. Currency-dependent calculations use compatible same-currency amounts only. Values below are illustrative policy from `config/rules.toml`, not legal thresholds.
+
+| Rule / proposed function | Required inputs | Condition and functionality | Finding measurements and evidence |
+| --- | --- | --- | --- |
+| pass_through / detect_pass_through | Account inflows/outflows, 60-minute horizon, FIFO policy | At least 3 incoming payments and at least 80% eligible observed inflow forwarded within the horizon; only strictly later outflows count | Allocation ledger, inflow/outflow IDs, denominator, forwarded ratio, time-to-forward; opening balance and exact provenance unknown |
+| fan_in / detect_fan_in | Receiver, 60-minute window, sender identities | At least 8 distinct sending accounts; identify collection concentration | Sender count, incoming count, totals by currency, supporting payments |
+| fan_out / detect_fan_out | Sender, 60-minute window, recipient identities | At least 8 distinct recipients; identify dispersal | Recipient count, outgoing count, totals by currency, supporting payments |
+| burst / detect_burst | Active-hour count, previous 7 complete days, comparable historical hourly windows | At least 20 payments and at least 4 times the median comparable prior count; zero/absent baseline yields unavailable under current policy | Current count, historical counts/median, ratio, coverage and payment IDs |
+| dormant_activation / detect_dormant_activation | Complete preceding observation, account history, current 120-minute window | At least 7 days observed inactivity after a prior observed transaction, then at least 10 payments | Last observed activity, covered inactive interval, activation count and payment IDs; do not call this verified bank dormancy |
+| repeated_splitting / detect_repeated_splitting | Direction, account, counterparty links, same-currency payments in 60 minutes | At least 5 payments on the same directed account-counterparty relationship, each below the policy-declared episode total; collection/dispersal findings may link related episodes | Episode total, per-payment values, counterparties and times; descriptive repeated splitting, not intentional structuring |
+| cash_out / detect_cash_out | Inflows, following exit payments, verified channel mapping | Disabled until the source channel can be reliably mapped and a time/value policy is configured | Inflows, exit IDs, mapped channel provenance and delay |
+| profile_mismatch / detect_profile_mismatch | Verified customer expected-activity policy, transactions | Disabled without real context and explicit comparison limits | Observed value/count, declared expectation, discrepancy and context source |
+| known_exposure / detect_known_exposure | Dated independent references and temporal graph | Disabled by default; delegates directional path/exposure work to graph service | Reference identity/date, directed path, depth and cutoff; never derived from IBM labels |
+
+The repeated-splitting rule intentionally records a broad pattern. Repeated legitimate payments can satisfy it. Without a configured contextual threshold or independent evidence it must not be described as deliberate reporting evasion.
+
+## Callable responsibility boundaries
+`engine.py` resolves eligibility, invokes enabled rules and combines findings without scoring them. Rule modules accept validated records, not raw CSV paths, UI state, benchmark labels or database connections. Graph-derived layering/cycle/coordinated-group findings come from the graph service and use the same Finding schema.
+
+## Minimal worked acceptance example
+Given same-currency incoming payments of 100, 100 and 100, followed strictly later by an eligible outgoing payment of 250 within 60 minutes, the allocated forwarded ratio is 250/300. The finding must include all four transaction IDs, the 300 denominator, the 250 allocated value and the FIFO assumption. Reversing the payment order must remove that pass-through finding. This is a handcrafted specification example, not IBM data.
