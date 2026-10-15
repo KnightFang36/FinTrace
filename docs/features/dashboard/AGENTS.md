@@ -1,7 +1,7 @@
 # Streamlit investigation dashboard contract instructions
 
 ## Purpose
-Maintain the authoritative contract in `README.md` for `app/`. Implementation is pending.
+Maintain the authoritative contract in `README.md` for `app/`. Four investigation views are implemented; case/report/evaluation/replay pages remain pending.
 
 ## Inputs
 - Implemented service read models and explicit dataset/run selection.
@@ -16,7 +16,7 @@ Maintain the authoritative contract in `README.md` for `app/`. Implementation is
 - Label the data as synthetic; show analysis cutoff, policy identity and coverage.
 - Provide date/currency/rule/priority/status filters and drill-through evidence.
 - Keep benchmark evaluation results in a separate view; do not reveal ground truth in normal investigation pages.
-- The current entry point displays a scaffold status page only; planned pages must not fabricate results.
+- The entry point routes implemented service-backed screens only. Missing data/services show explicit states without fabricated results.
 
 ## Maintenance constraints
 Keep the proposed interface, data-availability gates, failure modes and acceptance criteria synchronized with implementation. Do not present proposed APIs as implemented. Changes must preserve root instructions, cutoff isolation, source lineage and transparent evidence. Verify the acceptance criteria in README.md when this feature is implemented.

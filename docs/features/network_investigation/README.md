@@ -1,36 +1,36 @@
 # Network investigation
 
-**Status: implementation pending.** Owner: `src/fintrace/investigations/`.
+**Status: bounded source service and interactive Streamlit/PyVis view implemented.** Owner: `src/fintrace/investigations/`.
 
-## Proposed interface
-```text
-get_network_view(seeds, time_range, expansion_policy, run_id) -> NetworkView
+## Implemented interface
+
+```python
+get_network_view(graph, seed, *, hops=1, direction="both", max_nodes=60,
+                 max_edges=150, finding=None) -> dict
 ```
-This is a design signature, not an existing callable API. Concrete types must follow `docs/data_contracts.md`.
 
 ## Inputs
-- Account/alert seeds, time interval, direction, hop limit and node/edge display budgets.
-- Stored graph evidence, findings and deterministic layout seed.
+
+Verified graph JSON linked to the selected immutable priority snapshot, one exact bank/account seed, direction (incoming/outgoing/both), 1–3 hops, display budgets and an optional selected Finding mapping. `load_graph_evidence` verifies graph artifacts and dataset/cutoff identity before use. No full raw benchmark or evaluation file is opened by the frontend.
 
 ## Outputs
-- Interactive directed neighbourhood, node/edge details and highlighted temporal paths/cycles.
-- Layout coordinates, exportable graph data and truncation/filter diagnostics.
+
+Deterministic node IDs, account mappings, directed parallel transaction edges with complete paid/received amounts, currencies, timestamps and references; highlighted selected-finding IDs; source graph counts, missing-seed/partial flags, evidence completeness and display bounds.
 
 ## Functionality
-- Allow incoming/outgoing expansion and highlight evidence-specific account roles.
-- Display amount, currency, timestamp and transaction reference on edge selection.
-- Keep actual parallel payments accessible even when the initial view aggregates edges.
-- Use NetworkX to prepare graph data, PyVis for interaction and Matplotlib for static exports.
+
+Build a NetworkX MultiDiGraph from stored edges. Give selected evidence display precedence, then expand neighbours breadth-first with deterministic IDs. Direction controls neighbour expansion; the induced edges between selected accounts retain both directions as context. Enforce a maximum of 200 nodes/500 edges and preserve parallel IDs. The frontend uses a 40-node/150-edge default and a seeded inline PyVis layout. Orange edges denote selected evidence, not an independent suspicion calculation.
+
+Static full-snapshot PNG generation remains the separate graph CLI capability. Interactive/static exports and general case-report manifests are not added by this page.
 
 ## Errors and edge cases
-- Never load an unlimited full benchmark graph into the browser.
-- Display truncation does not silently alter underlying evidence or score.
-- Seeds outside the selected run/time interval return a clear no-data result.
+
+Invalid direction/hop/budget settings fail. Seeds absent from the graph report missing and do not fabricate nodes. Selected evidence outside the graph or display budget sets evidence_complete false. A partial neighbourhood does not alter findings, coverage or priorities. Structural reachability is never presented as a chronological path; only the detector's ordered finding references establish its observed timing pattern.
 
 ## Acceptance criteria
-- A highlighted cycle corresponds exactly to ordered evidence transactions.
-- A 200-node display limit reports omitted scope.
-- Repeated identical views use stable layout settings and node identities.
+
+Highlighted edges match exact finding transaction IDs. Parallel transfers remain accessible in the table/hover details. Display caps and omitted graph scope are visible. Stable source identities/settings produce stable node IDs and layout seed. Account and transaction text is escaped before embedding; no remote script/style source is needed for the network.
 
 ## Data availability
-Core feature; interactive and static rendering remain pending.
+
+Requires a linked completed temporal graph artifact. Rule-only snapshots show an actionable unavailable state. Source timestamp precision and the limited observation interval remain those declared by the selected graph run.

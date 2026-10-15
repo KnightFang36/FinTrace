@@ -20,3 +20,5 @@ IBM synthetic benchmark; explicit rules and NetworkX; transparent additive prior
 Timestamp interpretation, precision and coverage; feasible historical windows; verified channel mapping; runtime budgets; eligible currency handling; exact optional reference sources.
 
 All policy defaults in `config/` are illustrative starting values, not validated detection performance or legal thresholds.
+
+Core Streamlit work is now implemented: overview, alert review, account evidence and bounded interactive network exploration. Phase 5 remains partial (no case workflow or full-history queries); phase 6 remains partial (no general report/case/evaluation/replay UI). The frontend renders actual service outputs and explicit review actions; it does not imply those remaining features are complete.

@@ -2,7 +2,7 @@
 
 An explainable suspicious-transaction and potential money-mule investigation project using IBM's synthetic AML banking benchmark.
 
-**Status: data preparation and six deterministic transaction rules are implemented, with evidence-backed cutoff snapshots. Temporal NetworkX graphs and bounded PNG views are implemented. Fixed-policy priorities and persistent audited alerts are implemented. Investigation/case services, general reports and dashboard features remain pending.** The product screen is still a scaffold status page. See [the data workflow](data/README.md) and [rule workflow](docs/features/transaction_rules/README.md) for working commands.
+**Status: data preparation and six deterministic transaction rules are implemented, with evidence-backed cutoff snapshots. Temporal NetworkX graphs and bounded PNG views are implemented. Fixed-policy priorities and persistent audited alerts are implemented. The Streamlit overview, alert review, account evidence and interactive network screens are implemented. Case workflows, general reports, replay and evaluation remain pending.** See [the data workflow](data/README.md) and [rule workflow](docs/features/transaction_rules/README.md) for working commands.
 
 The agreed scope uses deterministic transaction rules, historical comparisons, NetworkX graph algorithms, transparent priority scoring, and investigator review. Machine learning, fitted classifiers, learned embeddings, and generated explanations are excluded.
 
@@ -34,7 +34,7 @@ The transaction export does not supply verified customer identities, account ope
 | [Evaluation](docs/features/evaluation/README.md) | Measure rule coverage and alert usefulness against benchmark labels | Frozen detections, separately stored labels | Precision/recall, coverage and review-budget metrics | Yes; labels concern laundering, not confirmed mules |
 | [Replay](docs/features/replay/README.md) | Process transaction events chronologically | Valid transactions, replay policy | Incremental findings, alerts and replay checkpoints | Yes; historical replay |
 | [Screening](docs/features/screening/README.md) | Optional reference-list candidate matching | Entity identities, dated reference lists | Review candidates and exact match evidence | Disabled without additional data |
-| [Dashboard](docs/features/dashboard/README.md) | Overview, queue, investigations, cases and exports | Service read models | Streamlit investigation screens | Planned |
+| [Dashboard](docs/features/dashboard/README.md) | Overview, queue, account and network views; cases/exports pending | Service read models | Streamlit investigation screens | Core views implemented |
 
 Rules, defaults, limitations, function contracts, and acceptance examples are detailed in the linked feature specifications. Every project directory contains an `AGENTS.md` describing its purpose, inputs, outputs, functionality, and implementation constraints.
 
@@ -115,7 +115,7 @@ python scripts/check_scaffold.py
 streamlit run app/streamlit_app.py
 ```
 
-The Streamlit command opens a status page only. `python3 scripts/prepare_data.py --help` lists data commands. Audit/create/verify require only the standard library; ingest/accounts and the rule runner use the pinned data environment in config/data-requirements.txt.
+The Streamlit command opens the investigation workspace; a missing store shows setup instructions. `python3 scripts/prepare_data.py --help` lists data commands. Audit/create/verify require only the standard library; ingest/accounts and the rule runner use the pinned data environment in config/data-requirements.txt.
 
 Run a deterministic snapshot on the prepared local dataset:
 
@@ -146,7 +146,7 @@ The uploaded HI-Small snapshot has been fully processed and verified: 5,078,345 
 
 ## Next implementation work
 
-Bounded temporal NetworkX analysis is implemented: chronological paths, circular flows, synchronized groups and descriptive graph context. Fixed-policy priority and local audited alert services are also implemented. The next phase in [the roadmap](docs/roadmap.md) is investigation/case services, followed by dashboard/reporting, replay and benchmark evaluation. Optional enrichment requires suitable independent inputs.
+Bounded temporal NetworkX analysis is implemented: chronological paths, circular flows, synchronized groups and descriptive graph context. Fixed-policy priority and local audited alert services are also implemented. The Streamlit overview, alert review and bounded account/network views are implemented. Case workflows, broader reporting, replay and benchmark evaluation remain in [the roadmap](docs/roadmap.md). Optional enrichment requires suitable independent inputs.
 
 Run the verified NetworkX snapshot and bounded PNG export:
 
@@ -169,3 +169,12 @@ Import matching frozen rule and graph snapshots into local review alerts:
 ```
 
 Replace run IDs and action time with actual values. See [the alert workflow](docs/features/alerts/README.md) for persistence, priority ledgers and audited state changes, and [checked results](docs/priority_alert_validation.md) for the verified IBM snapshot.
+
+## Investigation workspace
+
+```bash
+.venv/bin/python -m pip install -r config/frontend-requirements.txt
+.venv/bin/python -m streamlit run app/streamlit_app.py
+```
+
+Open the local URL printed by Streamlit (normally http://localhost:8501). The existing local alert store is discovered automatically. Choose a snapshot, filter the review queue, inspect contribution/evidence details, load account transfers, or explore a bounded interactive NetworkX/PyVis graph. Reviewer actions require an explicit form submission and reason. Missing data shows setup instructions. See [dashboard workflow](docs/features/dashboard/README.md) and [frontend validation](docs/frontend_validation.md). This local workspace has no authentication or public deployment configuration.

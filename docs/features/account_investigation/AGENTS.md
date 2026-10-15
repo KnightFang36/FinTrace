@@ -1,7 +1,7 @@
 # Account investigation contract instructions
 
 ## Purpose
-Maintain the authoritative contract in `README.md` for `src/fintrace/investigations/`. Implementation is pending.
+Maintain the authoritative contract in `README.md` for `src/fintrace/investigations/`. Snapshot dossiers and graph-window timelines are implemented; full-history queries remain pending.
 
 ## Inputs
 - Structured account identity, time range, analysis run and supported filters.

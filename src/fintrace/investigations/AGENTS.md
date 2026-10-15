@@ -1,7 +1,7 @@
 # Account investigation implementation instructions
 
 ## Purpose
-Own the source service described in `docs/features/account_investigation/README.md`. Also follow docs/features/network_investigation/README.md for network.py. Modules are placeholders until implemented.
+Own the source service described in `docs/features/account_investigation/README.md`. Also follow docs/features/network_investigation/README.md for network.py. dashboard.py, account.py and network.py implement snapshot-scoped read models and bounded evidence investigation. Full-history querying and verified profile context remain pending.
 
 ## Inputs
 - Structured account identity, time range, analysis run and supported filters.
@@ -23,3 +23,5 @@ Own the source service described in `docs/features/account_investigation/README.
 
 ## Implementation constraints
 Follow root invariants and shared records. Implement the feature contract's failure cases and acceptance examples. Keep labels out of this service entirely. Persist source evidence and explicit coverage; do not conceal insufficient input as no suspicious activity. Do not add business logic to the dashboard. Update docs and relevant tests with implementation.
+
+Dashboard reads use read-only connections, validated immutable priorities and finding IDs. Later alert evidence is excluded from earlier snapshot read models; current state/version/audit are separately identified as workflow metadata. Account totals are exact per currency within the selected graph window. Neighbourhoods enforce 3-hop/200-node/500-edge hard caps.
