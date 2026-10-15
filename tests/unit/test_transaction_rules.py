@@ -204,3 +204,6 @@ class RuleBoundaryTests(unittest.TestCase):
         policy = policy_for("burst", burst={"minimum_complete_history_days": 9})
         with self.assertRaises(ValueError):
             validate_policy(policy)
+        for values in ({"window_minutes": 1441}, {"history_days": 366}):
+            with self.subTest(values=values), self.assertRaises(ValueError):
+                validate_policy(policy_for("burst", burst=values))

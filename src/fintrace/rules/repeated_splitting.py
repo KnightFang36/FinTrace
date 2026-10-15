@@ -12,6 +12,7 @@ def detect_repeated_splitting(transactions, settings, policy, cutoff, context):
             groups[row.sender, row.receiver, row.payment_currency].append(row)
     result = Outcome()
     for (sender, receiver, currency), rows in sorted(groups.items()):
+        rows = sorted(rows, key=lambda row: (row.occurred_at, row.transaction_id))
         result.evaluated_groups += 1
         if len(rows) < settings["minimum_related_payments"]:
             continue

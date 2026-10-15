@@ -76,6 +76,8 @@ def validate_policy(policy: dict) -> dict:
             if not isinstance(settings["minimum_forwarded_ratio"], str) or not ratio.is_finite() or not 0 < ratio <= 1:
                 raise ValueError("Pass-through ratio must be decimal text in (0,1]")
         if rule == "burst":
+            if settings["window_minutes"] > 1440 or settings["history_days"] > 365:
+                raise ValueError("Burst windows must fit a 24-hour offset and history is bounded to 365 days")
             multiplier = settings["baseline_multiplier"]
             if not isinstance(multiplier, str):
                 raise ValueError("Baseline multiplier must be decimal text")

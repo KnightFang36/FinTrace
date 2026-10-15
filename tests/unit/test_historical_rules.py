@@ -27,13 +27,25 @@ class HistoricalRuleTests(unittest.TestCase):
         finding = result.findings[0]
         self.assertEqual(finding.measurements["historical_counts"], [1] * 7)
         self.assertEqual(finding.measurements["current_count"], 4)
-        self.assertEqual(set(finding.transaction_ids), {f"active-{i}" for i in range(4)})
+        self.assertEqual(set(finding.transaction_ids),
+                         {f"active-{i}" for i in range(4)} | {f"history-{i}" for i in range(1, 8)})
+        for index, window in enumerate(finding.measurements["comparison_windows"], 1):
+            self.assertEqual(window["transaction_ids"], [f"history-{index}"])
 
     def test_zero_baseline_is_explicitly_unavailable(self):
         result = run([transaction(str(i)) for i in range(20)], "burst", context=coverage())
         status = next(item for item in result.coverage if item.feature_id == "burst")
         self.assertEqual(status.status, "unavailable")
         self.assertIn("zero_historical_baseline", status.reason_codes)
+
+    def test_historical_counts_remain_aligned_with_their_windows(self):
+        counts = [7, 1, 2, 3, 4, 5, 6]
+        history = [transaction(f"history-{day}-{j}", when=CUTOFF - timedelta(days=day, minutes=10))
+                   for day, count in enumerate(counts, 1) for j in range(count)]
+        result = run([transaction(str(i)) for i in range(20)], "burst", history=history, context=coverage())
+        finding = result.findings[0]
+        self.assertEqual(finding.measurements["historical_counts"], counts)
+        self.assertEqual(finding.measurements["historical_median_count"], 4)
 
     def test_a_gap_prevents_claiming_seven_complete_days(self):
         history = [transaction(f"history-{i}", when=CUTOFF - timedelta(days=i, minutes=10))
@@ -51,6 +63,16 @@ class HistoricalRuleTests(unittest.TestCase):
         history = [transaction(f"history-{i}", when=CUTOFF - timedelta(days=i, minutes=10))
                    for i in range(1, 8)]
         self.assertFalse(run([transaction("active")], "burst", history=history, context=coverage()).findings)
+
+    def test_baseline_evidence_counts_toward_the_evidence_budget(self):
+        history = [transaction(f"history-{i}", when=CUTOFF - timedelta(days=i, minutes=10))
+                   for i in range(1, 8)]
+        policy = policy_for("burst", burst={"minimum_count": 4})
+        policy["execution"]["max_evidence_transactions"] = 10
+        result = run([transaction(str(i)) for i in range(4)], policy=policy,
+                     history=history, context=coverage())
+        self.assertFalse(result.findings)
+        self.assertEqual(next(c for c in result.coverage if c.feature_id == "burst").status, "truncated")
 
     def test_observed_reactivation_requires_historical_anchor(self):
         rows = [transaction(str(i), minutes=110-i) for i in range(3)]

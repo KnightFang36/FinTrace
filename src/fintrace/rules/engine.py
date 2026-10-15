@@ -33,7 +33,7 @@ def evaluate_rules(transactions, history=None, *, policy, cutoff, context=None) 
     cutoff = utc_instant(cutoff)
     context = dict(context or {})
     if set(context) - {"dataset_id", "subject_accounts", "observation_intervals", "known_gaps",
-                       "timezone_policy", "timezone_policy_basis"}:
+                       "timezone_policy", "timezone_policy_basis", "timestamp_precision"}:
         raise ValueError("Unknown context fields; benchmark or arbitrary enrichment inputs are not accepted")
     source_intervals(context)
     subjects = context.get("subject_accounts", ())
@@ -113,6 +113,7 @@ def evaluate_rules(transactions, history=None, *, policy, cutoff, context=None) 
          "eligible_input_records": len(rows), "excluded_self_transfers": self_count,
          "source_timezone_policy": context.get("timezone_policy"),
          "source_timezone_basis": context.get("timezone_policy_basis"),
+         "source_timestamp_precision": context.get("timestamp_precision", "unknown"),
          "limitations": ["Unknown observation coverage is not a clean-account determination.",
                          "The snapshot covers each rule's configured interval ending at cutoff."]},
     )

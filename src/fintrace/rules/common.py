@@ -97,6 +97,7 @@ def make_finding(rule, account, currency, transactions, measurements, settings, 
         limitations=(
             "A transaction pattern warrants review; it does not establish criminal intent.",
             "Self-transfers are excluded from movement and frequency indicators.",
+            "Elapsed durations reflect source timestamp values at their declared precision.",
             *limitations,
         ),
     )
