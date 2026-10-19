@@ -15,6 +15,8 @@ Own the source service described in `docs/features/ingestion/README.md`. Source 
 - Verify the duplicated Account columns by position; preserve identifiers as strings and raw source values.
 - Assign stable IDs using dataset/file/record identity. Identical transfer values do not imply duplicate events.
 - Stream chunks and coordinate validation before committing a completed dataset version.
+- For more than 250,000 accepted records, summarize exact account keys and duplicate hashes in 32 scratch partitions within the existing 512 MB DuckDB budget. Keep all endpoints for each key together, sort the final account registry, and preserve the small-input summary semantics.
+- Keep the large endpoint/hash projections lazy via the source relation; parameterized DuckDB sql() eagerly materializes result sets before partitioned writes.
 - Extract laundering labels into a physically separate evaluation artifact; never return them in detector records.
 
 ## Module responsibilities

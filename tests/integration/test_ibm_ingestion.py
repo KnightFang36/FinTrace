@@ -4,8 +4,9 @@ import json
 import tempfile
 from pathlib import Path
 import unittest
+from unittest.mock import patch
 import pyarrow.parquet as pq
-from fintrace.ingestion.ibm import ingest_ibm
+from fintrace.ingestion.ibm import _derive_accounts_and_diagnostics, ingest_ibm
 from fintrace.ingestion.manifest import IBM_HEADER, ManifestError, create_manifest, write_manifest
 
 
@@ -156,3 +157,27 @@ class IbmIngestionTests(unittest.TestCase):
         self.assertEqual(account["observed_currencies"], ["Bitcoin", "Euro"])
         self.assertEqual(account["source_endpoint_roles"], ["receiver", "sender"])
         self.assertEqual(account["dataset_id"], accounts[0]["dataset_id"])
+
+    def test_partitioned_summary_preserves_complete_accounts_and_duplicate_diagnostics(self):
+        """The scale path must equal the unpartitioned financial summary exactly."""
+        rows = [self.normal(), self.normal("1"),
+                "2022/09/01 00:01,001,000B,010,000A,0.50,Euro,1.20,US Dollar,ACH,0",
+                "2022/09/01 00:02,01,000A,01,000A,2.00,Euro,2.00,Euro,ACH,0"]
+        rows.extend(
+            f"2022/09/01 00:03,001,A{index:04},002,B{index:04},1.00,Euro,1.00,Euro,ACH,0"
+            for index in range(1000)
+        )
+        self.prepare(rows)
+        ingest_ibm(self.manifest, self.raw, self.processed)
+        quality = json.loads((self.dataset / "quality.json").read_text())
+        alternate = self.root / "partitioned-accounts.parquet"
+        with patch("fintrace.ingestion.ibm.SUMMARY_PARTITION_THRESHOLD", 0):
+            diagnostics = _derive_accounts_and_diagnostics(
+                self.dataset / "transactions.parquet", alternate, self.root / "scratch", quality,
+            )
+        self.assertTrue(pq.read_table(alternate).equals(pq.read_table(self.dataset / "accounts.parquet")))
+        self.assertEqual(diagnostics, {name: quality[name] for name in diagnostics})
+        self.assertEqual(diagnostics["duplicate_financial_records"], 1)
+        self.assertEqual(diagnostics["self_transfers"], 1)
+        self.assertEqual(diagnostics["observed_accounts"], 2003)
+        self.assertEqual(list((self.root / "scratch").glob("summary-*")), [])

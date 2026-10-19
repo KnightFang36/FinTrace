@@ -16,6 +16,7 @@ from fintrace.ingestion.manifest import ManifestError, _source_path, verify_mani
 from fintrace.validation.transactions import validate_transaction_fields
 
 INGESTION_VERSION = "ibm-parquet-v1"
+SUMMARY_PARTITION_THRESHOLD = 250000
 
 
 def _hash(path: Path) -> str:
@@ -59,6 +60,7 @@ def _schemas():
 def _derive_accounts_and_diagnostics(transaction_path: Path, accounts_path: Path, scratch: Path,
                                      metadata: dict) -> dict:
     import duckdb
+    import pyarrow.parquet as pq
     connection = duckdb.connect()
     try:
         connection.execute("SET memory_limit='512MB'")
@@ -66,8 +68,7 @@ def _derive_accounts_and_diagnostics(transaction_path: Path, accounts_path: Path
         connection.execute("SET preserve_insertion_order=false")
         connection.execute("SET temp_directory=?", [str(scratch)])
         # Detection-only Parquet is the sole input: no benchmark labels are queried.
-        query = """
-            WITH endpoints AS (
+        endpoints = """
                 SELECT sender_bank_id AS bank_id,
                     sender_account_id AS account_id, occurred_at, payment_currency AS currency,
                     'sender' AS role FROM read_parquet(?)
@@ -75,7 +76,8 @@ def _derive_accounts_and_diagnostics(transaction_path: Path, accounts_path: Path
                 SELECT receiver_bank_id AS bank_id,
                     receiver_account_id AS account_id, occurred_at, receiving_currency AS currency,
                     'receiver' AS role FROM read_parquet(?)
-            )
+        """
+        aggregate = """
             SELECT '1' AS schema_version, ? AS run_id, ? AS dataset_id, bank_id, account_id,
                 min(occurred_at) AS first_observed_at, max(occurred_at) AS last_observed_at,
                 list_sort(list(DISTINCT currency)) AS observed_currencies,
@@ -84,15 +86,57 @@ def _derive_accounts_and_diagnostics(transaction_path: Path, accounts_path: Path
             FROM endpoints GROUP BY bank_id, account_id
             ORDER BY bank_id, account_id
         """
-        relation = connection.sql(query, params=[str(transaction_path), str(transaction_path),
-                                                 metadata["run_id"], metadata["dataset_id"]])
-        relation.write_parquet(str(accounts_path), compression="zstd")
-        duplicate_rows = connection.execute("""
+        duplicate_query = """
             SELECT coalesce(sum(n - 1), 0) FROM (
                 SELECT count(*) AS n FROM read_parquet(?)
                 GROUP BY source_row_hash HAVING count(*) > 1
             )
-        """, [str(transaction_path)]).fetchone()[0]
+        """
+        # DISTINCT list aggregation keeps per-account state in memory. Hash whole
+        # account keys into scratch partitions before aggregating larger inputs;
+        # every endpoint for a key stays together, including different currencies.
+        # Duplicate hashes likewise stay together, without dropping any transfers.
+        if pq.ParquetFile(transaction_path).metadata.num_rows > SUMMARY_PARTITION_THRESHOLD:
+            scratch.mkdir(parents=True, exist_ok=True)
+            with tempfile.TemporaryDirectory(prefix="summary-", dir=scratch) as temporary:
+                work = Path(temporary)
+                endpoint_root = work / "endpoints"
+                # Parameterized sql() eagerly executes/materializes its result.
+                # Keep the large projection lazy so COPY can stream endpoints.
+                connection.read_parquet(str(transaction_path)).create_view("summary_source")
+                relation = connection.sql(
+                    "SELECT *, hash(bank_id, account_id) % 32 AS bucket FROM ("
+                    + endpoints.replace("read_parquet(?)", "summary_source") + ")",
+                )
+                relation.write_parquet(str(endpoint_root), partition_by=["bucket"],
+                                       row_group_size=16384, compression="zstd")
+                fragments = []
+                for index, directory in enumerate(sorted(endpoint_root.glob("bucket=*"))):
+                    files = [str(path) for path in sorted(directory.glob("*.parquet"))]
+                    fragment = work / f"accounts-{index}.parquet"
+                    connection.sql(
+                        "WITH endpoints AS (SELECT * FROM read_parquet(?)) " + aggregate,
+                        params=[files, metadata["run_id"], metadata["dataset_id"]],
+                    ).write_parquet(str(fragment), compression="zstd")
+                    fragments.append(str(fragment))
+                connection.read_parquet(fragments).order("bank_id, account_id").write_parquet(
+                    str(accounts_path), compression="zstd")
+                shutil.rmtree(endpoint_root)
+                hash_root = work / "hashes"
+                connection.sql(
+                    "SELECT source_row_hash, hash(source_row_hash) % 32 AS bucket FROM summary_source",
+                ).write_parquet(str(hash_root), partition_by=["bucket"],
+                                row_group_size=16384, compression="zstd")
+                duplicate_rows = 0
+                for directory in sorted(hash_root.glob("bucket=*")):
+                    files = [str(path) for path in sorted(directory.glob("*.parquet"))]
+                    duplicate_rows += connection.execute(duplicate_query, [files]).fetchone()[0]
+        else:
+            relation = connection.sql("WITH endpoints AS (" + endpoints + ") " + aggregate,
+                                      params=[str(transaction_path), str(transaction_path),
+                                              metadata["run_id"], metadata["dataset_id"]])
+            relation.write_parquet(str(accounts_path), compression="zstd")
+            duplicate_rows = connection.execute(duplicate_query, [str(transaction_path)]).fetchone()[0]
         counts = connection.execute("""
             SELECT count(*),
                 strftime(min(occurred_at) AT TIME ZONE 'UTC', '%Y-%m-%dT%H:%M:%SZ'),

@@ -27,6 +27,8 @@ The adapter streams CSV batches into decimal(38,8) Parquet, validates timestamps
 - Extract laundering labels into a physically separate evaluation artifact; never return them in detector records.
 
 ## Errors and edge cases
+
+Large imports (more than 250,000 accepted rows) hash-partition account endpoints and duplicate-content hashes into 32 temporary partitions before aggregation, retaining the 512 MB DuckDB budget. Every exact bank/account key and every equal financial-content hash stays within one partition. Final account records remain sorted by exact bank/account strings, with the same currency sets, observed times, endpoint roles and duplicate-retention diagnostics as smaller imports. Scratch partitions are removed before completed publication. This changes execution only; detection records, policy thresholds and evidence semantics are unchanged.
 - Missing header fields or unset timestamp interpretation stop the affected import.
 - Malformed rows go to quarantine. Partial imports must not appear complete.
 - A stale ingest lock from a killed process fails with a message naming the lock path and the recovery step, rather than a bare `FileExistsError`.
@@ -40,4 +42,4 @@ The adapter streams CSV batches into decimal(38,8) Parquet, validates timestamps
 ## Data availability
 Supported by IBM transaction exports after schema and source interpretation are verified.
 
-Separately supplied HI-Small_accounts.csv may be preserved by reconcile_publisher_accounts. Its Bank ID strings can differ in zero padding from transaction bank IDs. The output records exact matches, explicit numeric zero-padding candidates, ambiguities and missing links. Synthetic source entity metadata is retained separately and is not inferred from transaction IDs. Publisher pattern files remain evaluation-only.
+Separately supplied IBM account tables, including HI-Small_accounts.csv and HI-Medium_accounts.csv, may be preserved by reconcile_publisher_accounts. Its Bank ID strings can differ in zero padding from transaction bank IDs. The output records exact matches, explicit numeric zero-padding candidates, ambiguities and missing links. Synthetic source entity metadata is retained separately and is not inferred from transaction IDs. Publisher pattern files remain evaluation-only.
