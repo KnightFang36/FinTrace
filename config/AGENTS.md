@@ -10,7 +10,7 @@ Reviewed demonstration thresholds, graph budgets, source interpretation and enab
 app.toml, rules.toml and scoring.toml consumed by future services.
 
 ## Functionality
-app.toml controls storage, graph limits and timestamp policy. rules.toml defines eligibility/windows/thresholds. scoring.toml defines capped rule families and bands. Changes must be recorded with analysis runs.
+app.toml controls storage, graph limits and timestamp policy. rules.toml defines eligibility/windows/thresholds for the six core rules; its graph-rule and optional-rule sections accept `enabled` alone, because those thresholds live in graph.toml or are not implemented yet. scoring.toml defines capped rule families and bands. Changes must be recorded with analysis runs.
 
 ## Constraints
 data-requirements.txt pins the verified data/graph/test environment. frontend-requirements.txt extends it with the verified Streamlit/PyVis runtime stack; no predictive dependencies are included. Update it from an actually verified environment, not guessed version numbers.
