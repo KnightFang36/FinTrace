@@ -17,17 +17,48 @@ def _connect(path):
     return duckdb.connect(str(path), read_only=True)
 
 
+SNAPSHOT_CATALOG_LIMIT = 200
+
+
 def list_snapshots(database):
+    """Return the newest snapshots, newest first, with the hidden count disclosed.
+
+    Snapshots are ordered by analysis cutoff, not by content-addressed ID. IDs are
+    hashes, so ordering by them would hide arbitrary cutoffs while the list still
+    looked cutoff-sorted. Instants are UTC-normalized by canonical_json, so their
+    text order equals chronological order. Only the selected payloads are loaded,
+    so the read stays bounded on a large catalog.
+    """
+    import duckdb
+
+    limit = SNAPSHOT_CATALOG_LIMIT
     with _connect(database) as connection:
-        rows = connection.execute("SELECT id,payload FROM ft_priority_runs ORDER BY id LIMIT 201").fetchall()
+        try:
+            total = connection.execute("SELECT count(*) FROM ft_priority_runs").fetchone()[0]
+            rows = connection.execute(
+                "WITH ordered AS ("
+                "  SELECT id, json_extract_string(payload, '$.window.end') AS cutoff"
+                "  FROM ft_priority_runs ORDER BY cutoff DESC NULLS LAST, id DESC LIMIT ?"
+                ") SELECT o.id, t.payload, o.cutoff FROM ordered o JOIN ft_priority_runs t USING (id)"
+                " ORDER BY o.cutoff DESC NULLS LAST, o.id DESC",
+                [limit],
+            ).fetchall()
+        except duckdb.Error as error:
+            raise ValueError(
+                "Snapshot catalog is unreadable; the alert store holds a malformed priority snapshot: "
+                f"{error}"
+            ) from error
     items = []
-    for identifier, text in rows[:200]:
+    for identifier, text, cutoff in rows:
         snapshot = json.loads(text)
         validate_priority_snapshot(snapshot)
+        if snapshot["window"]["end"] != cutoff:
+            raise ValueError(f"Snapshot catalog ordering disagrees with stored payload for {identifier}")
         items.append({"id": identifier, "cutoff": snapshot["window"]["end"],
                       "accounts": len(snapshot["accounts"]), "policy": snapshot["policy"]["policy_version"]})
-    return {"items": sorted(items, key=lambda item: (item["cutoff"], item["id"]), reverse=True),
-            "truncated": len(rows) > 200}
+    items.sort(key=lambda item: (item["cutoff"], item["id"]), reverse=True)
+    return {"items": items, "truncated": total > limit, "excluded": max(0, total - limit), "total": total}
+
 
 
 def load_dashboard(database, snapshot_id):

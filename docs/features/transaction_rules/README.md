@@ -42,6 +42,8 @@ Core rules supported; cash-out and profile mismatch are gated by additional veri
 
 All windows exclude records at or after their end/cutoff. Currency-dependent calculations use compatible same-currency amounts only. Values below are illustrative policy from `config/rules.toml`, not legal thresholds.
 
+`config/rules.toml` carries parameters only for the six core rules. The `layering`, `circular_flow` and `coordinated_group` sections accept `enabled` alone and report coverage from this policy. Their thresholds are read from `config/graph.toml`. Any other key in those sections, or in the unimplemented `cash_out`, `profile_mismatch` and `known_exposure` sections, fails validation instead of being ignored.
+
 | Rule / proposed function | Required inputs | Condition and functionality | Finding measurements and evidence |
 | --- | --- | --- | --- |
 | pass_through / detect_pass_through | Account inflows/outflows, 60-minute horizon, FIFO policy | At least 3 incoming payments and at least 80% eligible observed inflow forwarded within the horizon; only strictly later outflows count | Allocation ledger, inflow/outflow IDs, denominator, forwarded ratio, time-to-forward; opening balance and exact provenance unknown |
