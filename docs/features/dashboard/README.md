@@ -8,6 +8,8 @@ Run `.venv/bin/python -m streamlit run app/streamlit_app.py` from the repository
 
 The app reads service models through `fintrace.investigations.dashboard`. Financial calculations, snapshot isolation, repository reads and network expansion live in source services. Presentation modules live under `app/views/`; `app/components/` contains labels, coverage tables and bounded PyVis rendering. `.streamlit/config.toml` defines the local theme and disables usage telemetry.
 
+The workspace uses a dark operations theme with charcoal/navy surfaces, bright text, teal metric accents and visible keyboard focus. Captions, tables, controls, charts and the embedded network canvas use compatible dark colours; network seeds and selected evidence use amber. These colours aid reading and selection without changing fixed-policy priorities or detection behaviour.
+
 ## Inputs
 
 An existing local `data/processed/alerts.duckdb` populated by `scripts/manage_alerts.py import`, immutable priority snapshots and the optional graph run linked by the selected snapshot. `FINTRACE_PROCESSED_ROOT` and `FINTRACE_ALERT_DATABASE` may select alternate local fixture/workspace paths. No datasets are downloaded, imported or analyzed automatically. The dashboard never opens benchmark labels or supplied pattern annotations.
