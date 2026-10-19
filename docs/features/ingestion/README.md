@@ -10,7 +10,7 @@ ingest_ibm(source_path, manifest, policy) -> IngestionResult
 ```
 Implemented interface: `ingest_ibm(manifest_path, raw_root, processed_root, *, batch_size=25000, progress=None) -> dict`. The return value is a completion inventory or an integrity-verified reuse result. It publishes detection artifacts under datasets/<dataset_id>/ and benchmark artifacts under evaluation/<dataset_id>/, with separate quality reports.
 
-The adapter streams CSV batches into decimal(38,8) Parquet, validates timestamps under the manifest policy, derives exact-key observed accounts, and retains duplicate financial records. Invalid financial rows are quarantined without their label column. Missing/invalid labels are recorded only in evaluation artifacts and do not reject otherwise valid financial rows. Irrecoverable CSV quoting errors abort the import without publishing a completed dataset. Manifest, source and artifact integrity are checked before completed data can be reused.
+The adapter streams CSV batches into decimal(38,8) Parquet, validates timestamps under the manifest policy, derives exact-key observed accounts, and retains duplicate financial records. Invalid financial rows are quarantined without their label column. A quarantined row keeps its ten financial fields, its issue codes, the observed source width and any unexpected trailing columns beyond the label, so a widened or misquoted source is diagnosable. Missing/invalid labels are recorded only in evaluation artifacts and do not reject otherwise valid financial rows. Irrecoverable CSV quoting errors abort the import without publishing a completed dataset. Manifest, source and artifact integrity are checked before completed data can be reused.
 
 ## Inputs
 - Immutable IBM CSV with verified positional header, dataset manifest and parsing policy.
@@ -29,6 +29,7 @@ The adapter streams CSV batches into decimal(38,8) Parquet, validates timestamps
 ## Errors and edge cases
 - Missing header fields or unset timestamp interpretation stop the affected import.
 - Malformed rows go to quarantine. Partial imports must not appear complete.
+- A stale ingest lock from a killed process fails with a message naming the lock path and the recovery step, rather than a bare `FileExistsError`.
 - Reimporting the same source identity is idempotent.
 
 ## Acceptance criteria

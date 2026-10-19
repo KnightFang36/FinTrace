@@ -55,7 +55,19 @@ def validate_policy(policy: dict) -> dict:
         settings = policy[rule]
         if not isinstance(settings, dict) or type(settings.get("enabled")) is not bool:
             raise ValueError(f"{rule}.enabled must be explicit boolean")
-        if rule not in CORE_RULES or not settings["enabled"]:
+        if rule not in CORE_RULES:
+            # Graph rules read thresholds from config/graph.toml; optional context rules
+            # are not implemented. Neither honors parameters from this file, so accepting
+            # them would silently discard an operator's edit.
+            unknown = sorted(set(settings) - {"enabled"})
+            if unknown:
+                location = ("config/graph.toml" if rule in GRAPH_RULES
+                            else "the rule's feature contract")
+                raise ValueError(
+                    f"{rule} accepts only 'enabled' in rules.toml; configure {unknown} in {location}"
+                )
+            continue
+        if not settings["enabled"]:
             continue
         if set(settings) - {"enabled", *allowed[rule]}:
             raise ValueError(f"Unknown parameter for {rule}")

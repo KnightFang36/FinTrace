@@ -60,7 +60,7 @@ Link fields: `account_key`, `link_type`, `link_value_token`, `source_id`, `effec
 ## ValidationIssue and QualityReport
 Issue fields: `issue_id`, source identity, record number, `field`, `code`, `severity`, `message`, `disposition`.
 
-Report fields: accepted/rejected/warning counts, affected records, missing columns, duplicate-content counts, coverage gaps and policy version. File-level schema errors stop ingestion; row-level failures produce quarantine entries. A reimport of the same dataset/file/record is idempotent.
+Report fields: accepted/rejected/warning counts, affected records, missing columns, duplicate-content counts, coverage gaps and policy version. File-level schema errors stop ingestion; row-level failures produce quarantine entries. A quarantine entry keeps the ten financial source fields, the issue codes and messages, the observed source field count, and any unexpected columns beyond the label column. The benchmark label is never copied into a quarantine entry. A reimport of the same dataset/file/record is idempotent.
 
 ## Finding
 Fields: `finding_id`, `rule_id`, `rule_version`, `subject_accounts[]`, `subject_roles[]`, `window_start`, `window_end`, `cutoff`, `transaction_ids[]`, `measurements`, `thresholds`, `currency`, `evidence_graph_ref`, `explanation`, `limitations[]`, `coverage_status`.

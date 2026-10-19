@@ -49,25 +49,16 @@ window_minutes = 60
 minimum_related_payments = 5
 # No legal/reporting threshold is inferred.
 
+# Graph-derived rules report coverage from this file but read their thresholds from
+# config/graph.toml. Only 'enabled' is accepted here; other keys are rejected.
 [layering]
 enabled = true
-window_minutes = 180
-minimum_hops = 3
-maximum_hops = 4
-require_strict_time_order = true
 
 [circular_flow]
 enabled = true
-window_minutes = 180
-minimum_cycle_length = 2
-maximum_cycle_length = 5
-require_strict_time_order = true
 
 [coordinated_group]
 enabled = true
-window_minutes = 60
-minimum_accounts = 3
-minimum_repeated_windows = 2
 
 [cash_out]
 enabled = false

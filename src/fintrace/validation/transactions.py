@@ -71,13 +71,23 @@ def _timestamp(value: str, zone_name: str, precision: str) -> datetime:
 
 def validate_transaction_fields(
     fields: Sequence[str], *, timezone_policy: str, timestamp_precision: str,
+    observed_field_count: int | None = None,
 ) -> RowValidation:
-    """Validate financial fields; preserve exact strings and fixed-point values."""
+    """Validate financial fields; preserve exact strings and fixed-point values.
+
+    ``observed_field_count`` reports the true source width when the caller passes a
+    narrowed field list. Without it, a rejected row cannot be diagnosed, because a
+    13-field row and a truncated row both arrive as ten fields or fewer.
+    """
     ZoneInfo(timezone_policy)
     if timestamp_precision not in ("minute", "second"):
         raise ValueError("Unsupported timestamp precision policy")
     if len(fields) != 10:
-        return RowValidation(None, (_issue("record", "field_count", "Expected ten financial source fields"),))
+        observed = len(fields) if observed_field_count is None else observed_field_count
+        return RowValidation(None, (_issue(
+            "record", "field_count",
+            f"Expected ten financial source fields; source row has {observed}",
+        ),))
     record = dict(zip(FIELD_NAMES, fields))
     issues = []
     for field in (
