@@ -18,6 +18,8 @@ The transaction export does not supply verified customer identities, account ope
 
 ## Features and availability
 
+Implemented now: data preparation, deterministic rules, bounded temporal graphs, fixed-policy priorities, audited alerts, snapshot account/network investigation and the four-page Streamlit workspace. Cases, general report exports, chronological replay, benchmark evaluation and optional context/screening services remain pending; IBM-only support in the table describes data feasibility, not implementation status. Full-history account queries and complete-history-dependent rules are unavailable without the required implementation or declared coverage.
+
 | Feature | Functionality | Inputs | Outputs | IBM-only support |
 | --- | --- | --- | --- | --- |
 | [Ingestion](docs/features/ingestion/README.md) | Normalize and preserve source lineage | IBM CSV, dataset manifest | Transactions, observed accounts, separate benchmark labels | Yes |
@@ -129,7 +131,7 @@ Findings and feature coverage are written under data/processed/rule_runs/<run_id
 
 Core libraries: Pandas, NetworkX, Matplotlib, Streamlit, DuckDB, PyArrow and PyVis. Pytest is reserved for implementation verification. TOML is read with the Python standard library.
 
-The uploaded HI-Small snapshot has been fully processed and verified: 5,078,345 accepted transactions, 515,088 observed account keys, and zero quarantined financial rows. See [the checked dataset report](docs/data_validation.md) for checksums, label isolation, identifier reconciliation, explicit provenance assumptions and repeatable verification commands.
+The uploaded HI-Small snapshot has been fully processed and verified: 5,078,345 accepted transactions, 515,088 observed account keys, and zero quarantined financial rows. See [the checked dataset report](docs/data_validation.md) for checksums, label isolation, identifier reconciliation, explicit provenance assumptions and repeatable verification commands. The separately supplied HI-Medium files use the same importer and policies; see [the HI-Medium report](docs/hi_medium_validation.md) and [import workflow](data/README.md#selecting-hi-medium).
 
 ## Detection and explanation principles
 
