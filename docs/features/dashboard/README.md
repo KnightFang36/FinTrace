@@ -31,7 +31,7 @@ The network panel uses inline PyVis resources, escaped account/transaction label
 
 ## Errors and edge cases
 
-A missing/empty store shows setup instructions and no fabricated metrics; reads never create it. Missing graph evidence leaves rule findings available. Corrupt snapshots or graph artifacts fail visibly. Table/timeline/network display limits are disclosed. The catalog is limited to 200 snapshots; oversized models fail rather than silently sample (10,000 accounts, 20,000 findings/alerts, 250 MiB graph artifact). Snapshot lists use a bounded ID prefix before sorting by cutoff; this is not a promise to show the latest 200 of a larger catalog. A paginated repository is required beyond these limits.
+A missing/empty store shows setup instructions and no fabricated metrics; reads never create it. Missing graph evidence leaves rule findings available. Corrupt snapshots or graph artifacts fail visibly. Table/timeline/network display limits are disclosed. The catalog shows the newest 200 snapshots by analysis cutoff, newest first, and reports how many older snapshots are hidden; oversized models fail rather than silently sample (10,000 accounts, 20,000 findings/alerts, 250 MiB graph artifact). A paginated repository is required to browse beyond those 200 snapshots.
 
 Changed review versions fail rather than overwrite another action. Cache TTLs are 30 seconds for dashboard models and 60 seconds for graph evidence; explicit refresh or successful writes clear them. No workflow action is run on behalf of an investigator during normal rendering.
 
