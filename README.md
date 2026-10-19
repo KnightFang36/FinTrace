@@ -72,3 +72,5 @@ python -m pytest tests -q
 - [Local validation](docs/validation.md): measured dataset, dashboard and workflow verification.
 
 `app/` contains Streamlit presentation, `src/fintrace/` contains domain services, `scripts/` contains operational commands, and `tests/` contains synthetic verification fixtures. Data and exports stay local; the application does not submit reports or restrict accounts.
+
+The retained [presentation PDF](docs/PRESENTATION.pdf) and [editable slides](docs/PRESENTATION.pptx) describe the earlier four-page demo. They are historical presentation assets; use the service list above for current functionality.
