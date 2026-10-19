@@ -31,6 +31,10 @@ class HistoricalRuleTests(unittest.TestCase):
                          {f"active-{i}" for i in range(4)} | {f"history-{i}" for i in range(1, 8)})
         for index, window in enumerate(finding.measurements["comparison_windows"], 1):
             self.assertEqual(window["transaction_ids"], [f"history-{index}"])
+        # The reported window covers one active hour; the baseline IDs predate it, so say so.
+        self.assertIn("outside the active window", " ".join(finding.limitations))
+        self.assertTrue(any(identifier.startswith("history-") for identifier in finding.transaction_ids))
+        self.assertEqual(finding.window_start, CUTOFF - timedelta(minutes=60))
 
     def test_zero_baseline_is_explicitly_unavailable(self):
         result = run([transaction(str(i)) for i in range(20)], "burst", context=coverage())

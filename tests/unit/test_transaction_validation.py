@@ -53,3 +53,40 @@ class TransactionValidationTests(unittest.TestCase):
     def test_financial_function_does_not_accept_label_column(self):
         result = validate_transaction_fields(["x"] * 11, timezone_policy="UTC", timestamp_precision="minute")
         self.assertEqual(result.issues[0]["code"], "field_count")
+
+
+class PackageStatusTests(unittest.TestCase):
+    """A package whose modules are implemented must not advertise itself as pending."""
+
+    PENDING_MARKERS = ("implementation pending", "no callable api", "planned fintrace")
+
+    def test_package_docstrings_match_their_module_implementation_status(self):
+        import importlib
+        import pkgutil
+        import fintrace
+
+        def is_placeholder(module):
+            source = (getattr(module, "__doc__", "") or "").lower()
+            return any(marker in source for marker in self.PENDING_MARKERS)
+
+        checked = 0
+        for info in pkgutil.iter_modules(fintrace.__path__):
+            package = importlib.import_module(f"fintrace.{info.name}")
+            modules = [package]
+            if hasattr(package, "__path__"):
+                modules += [importlib.import_module(f"fintrace.{info.name}.{sub.name}")
+                            for sub in pkgutil.iter_modules(package.__path__)]
+            if all(is_placeholder(module) for module in modules):
+                continue  # Genuinely pending: the banner is required here.
+            checked += 1
+            self.assertFalse(
+                is_placeholder(package),
+                f"fintrace.{info.name} has implemented modules but its docstring still says it is pending",
+            )
+        self.assertGreater(checked, 0)
+
+    def test_validation_package_reexports_its_implemented_entry_point(self):
+        import fintrace.validation as validation
+
+        self.assertIs(validation.validate_transaction_fields, validate_transaction_fields)
+        self.assertNotIn("implementation pending", (validation.__doc__ or "").lower())

@@ -51,6 +51,7 @@ def detect_burst(transactions, settings, policy, cutoff, context):
             f"{len(windows)} complete comparable historical windows.", role="high_frequency_account",
             extra_ids=tuple(row.transaction_id for items in window_rows for row in items),
             limitations=("Historical comparison days are fixed 24-hour UTC offsets.",
+                         "Baseline comparison transactions are historical evidence outside the active window.",
                          "Frequency alone can also reflect legitimate business activity."),
         ), policy)
     return result
