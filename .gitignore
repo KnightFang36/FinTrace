@@ -10,23 +10,11 @@ dist/
 .env
 .streamlit/secrets.toml
 
-# Keep contracts; keep source data and generated artifacts local.
-data/raw/**/*
-!data/raw/**/
-!data/raw/**/AGENTS.md
-!data/raw/README.md
-!data/raw/ibm/README.md
-data/processed/**/*
-!data/processed/**/
-!data/processed/**/AGENTS.md
-!data/processed/README.md
-data/reference/**/*
-!data/reference/**/
-!data/reference/**/AGENTS.md
-!data/reference/README.md
-outputs/**/*
-!outputs/**/
-!outputs/**/AGENTS.md
+# Source datasets, references and generated artifacts stay local.
+data/raw/
+data/processed/
+data/reference/
+outputs/
 
 # Approved non-sensitive test examples may be committed.
 tests/fixtures/**/*.parquet

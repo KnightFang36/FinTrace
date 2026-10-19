@@ -1,4 +1,4 @@
-"""Check scaffold contracts with the standard library; does not test detection."""
+"""Check maintained structure, syntax, policies and links without loading local data."""
 
 from __future__ import annotations
 
@@ -9,7 +9,15 @@ import tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REQUIRED_DIRECTORIES = ["app","app/components","app/views","config","data","data/processed","data/raw","data/raw/ibm","data/reference","docs","docs/features","docs/features/account_investigation","docs/features/alerts","docs/features/cases","docs/features/dashboard","docs/features/entity_context","docs/features/evaluation","docs/features/ingestion","docs/features/network_investigation","docs/features/priority_scoring","docs/features/replay","docs/features/reporting","docs/features/screening","docs/features/temporal_graphs","docs/features/transaction_rules","docs/features/validation","outputs","scripts","src","src/fintrace","src/fintrace/alerts","src/fintrace/cases","src/fintrace/context","src/fintrace/evaluation","src/fintrace/graph","src/fintrace/ingestion","src/fintrace/investigations","src/fintrace/replay","src/fintrace/reporting","src/fintrace/rules","src/fintrace/scoring","src/fintrace/screening","src/fintrace/storage","src/fintrace/validation","tests","tests/fixtures","tests/integration","tests/unit"]
+REQUIRED_DIRECTORIES = [
+    "app", "app/components", "app/views", "config", "data", "docs", "scripts", "src", "src/fintrace",
+    "src/fintrace/alerts", "src/fintrace/cases", "src/fintrace/graph", "src/fintrace/ingestion",
+    "src/fintrace/investigations", "src/fintrace/replay", "src/fintrace/reporting",
+    "src/fintrace/rules", "src/fintrace/scoring", "src/fintrace/storage", "src/fintrace/validation",
+    "tests", "tests/integration", "tests/unit",
+]
+REQUIRED_DOCUMENTS = ["AGENTS.md", "README.md", "docs/architecture.md", "docs/data_contracts.md",
+                      "docs/services.md", "docs/validation.md"]
 CODE_AND_DOC_ROOTS = ("app", "config", "docs", "scripts", "src", "tests")
 IGNORED_DIRECTORIES = {"__pycache__", ".pytest_cache", ".venv"}
 FORBIDDEN_DEPENDENCIES = {
@@ -22,23 +30,18 @@ LINK = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
 
 def main() -> int:
     errors: list[str] = []
-    checked_directories = 0
-    for relative in [".", *REQUIRED_DIRECTORIES]:
-        directory = ROOT / relative
-        if not directory.is_dir():
+    for relative in REQUIRED_DIRECTORIES:
+        if not (ROOT / relative).is_dir():
             errors.append(f"Missing directory: {relative}")
-        elif not (directory / "AGENTS.md").is_file():
-            errors.append(f"Missing folder instructions: {relative}/AGENTS.md")
-        checked_directories += 1
-
+    for relative in REQUIRED_DOCUMENTS:
+        if not (ROOT / relative).is_file():
+            errors.append(f"Missing document: {relative}")
+    # One project-wide instruction file and guide; no per-folder scaffolding.
     for relative in CODE_AND_DOC_ROOTS:
-        for directory in (ROOT / relative).rglob("*"):
-            if not directory.is_dir():
-                continue
-            if any(part in IGNORED_DIRECTORIES or part.startswith(".") for part in directory.relative_to(ROOT).parts):
-                continue
-            if not (directory / "AGENTS.md").is_file():
-                errors.append(f"Missing folder instructions: {directory.relative_to(ROOT)}")
+        for name in ("AGENTS.md", "README.md"):
+            for path in (ROOT / relative).rglob(name):
+                if not any(part in IGNORED_DIRECTORIES for part in path.relative_to(ROOT).parts):
+                    errors.append(f"Redundant folder document: {path.relative_to(ROOT)}")
 
     python_files = [
         path for relative in ("app", "scripts", "src", "tests")
@@ -54,9 +57,9 @@ def main() -> int:
     markdown_files = [ROOT / "README.md", ROOT / "AGENTS.md"]
     for relative in CODE_AND_DOC_ROOTS:
         markdown_files.extend((ROOT / relative).rglob("*.md"))
-    markdown_files.extend((ROOT / "data").rglob("*.md"))
-    markdown_files.extend((ROOT / "outputs").rglob("AGENTS.md"))
     for path in markdown_files:
+        if not path.is_file():
+            continue
         content = path.read_text(encoding="utf-8")
         for match in LINK.finditer(content):
             target = match.group(1).strip().strip("<>")
@@ -108,29 +111,24 @@ def main() -> int:
         if scoring.get("maximum_score") != 100:
             errors.append("Priority maximum must be 100")
 
-    feature_directories = sorted(
-        path for path in (ROOT / "docs/features").iterdir() if path.is_dir()
-    )
-    for feature in feature_directories:
-        readme = feature / "README.md"
-        if not readme.is_file():
-            errors.append(f"Missing feature contract: {feature.name}")
-            continue
-        content = readme.read_text(encoding="utf-8")
+    contracts = ROOT / "docs/services.md"
+    if contracts.is_file():
+        content = contracts.read_text(encoding="utf-8")
         for heading in (
-            "## Inputs", "## Outputs", "## Functionality",
-            "## Errors and edge cases", "## Acceptance criteria", "## Data availability",
+            "Ingestion and validation", "Transaction rules", "Temporal graphs", "Priorities and alerts",
+            "Account and network investigation", "Cases", "Reports", "Historical replay",
+            "Dashboard and acceptance checks",
         ):
-            if heading not in content:
-                errors.append(f"Incomplete feature contract {feature.name}: {heading}")
+            if f"## {heading}" not in content:
+                errors.append(f"Missing service contract: {heading}")
 
     if errors:
         for error in sorted(set(errors)):
             print(f"ERROR: {error}", file=sys.stderr)
         return 1
     print(
-        f"Scaffold checks passed: {checked_directories} required directories, "
-        f"{len(feature_directories)} feature contracts, "
+        f"Structure checks passed: {len(REQUIRED_DIRECTORIES)} required directories, "
+        f"{len(REQUIRED_DOCUMENTS)} maintained documents, "
         f"{len(python_files)} Python files, valid TOML and local links."
     )
     print("Structure checks do not verify runtime functionality; run the implemented feature tests separately.")

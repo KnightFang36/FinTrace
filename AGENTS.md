@@ -1,42 +1,35 @@
-# Project instructions
+# FinTrace project instructions
 
-## Purpose and scope
-Implement the documented FinTrace banking investigation system against IBM's fully synthetic AML benchmark. Data preparation, transaction rules, bounded temporal graphs, fixed-policy priorities and persistent audited alerts, versioned cases, verified local reports, checkpointed historical replay and the Streamlit investigation workspace are implemented; the remaining feature contracts explicitly mark pending services.
+This is the single instruction file for the repository. Maintain the implemented local investigation system; do not restore removed feature scaffolds unless requested. Setup and commands belong in [README.md](README.md), callable contracts in [docs/services.md](docs/services.md), shared schemas in [docs/data_contracts.md](docs/data_contracts.md), and measured verification in [docs/validation.md](docs/validation.md).
 
-The user's instruction is authoritative: **exclude all machine-learning functionality**. Use explicit transaction rules, deterministic historical comparisons, NetworkX algorithms and auditable policy weights. Do not add Scikit-learn, fitted predictors, embeddings, automated prose generation, or similar features.
+## Scope and ownership
 
-## Inputs
-IBM source files and a provenance manifest; versioned TOML policies; optional independently sourced context; analyst actions. Read the relevant feature specification and folder instructions before modifying a module.
+Use explicit transaction rules, deterministic historical comparisons, NetworkX algorithms and fixed, auditable priority weights. **Exclude all machine learning**, fitted predictors, embeddings and generated prose. The working services are ingestion/validation, transaction rules, temporal graphs, priorities, audited alerts, snapshot account/network investigation, cases, local reports and historical replay. Benchmark evaluation, independent context/screening, general orchestration and full-history account querying are outside the maintained scope.
 
-## Outputs
-Normalized transaction/account records, validation diagnostics, evidence-backed findings, priority scores, alerts, cases, reports and benchmark measurements. Shared schemas are specified in `docs/data_contracts.md`.
+Business logic belongs in `src/fintrace`; Streamlit in `app` presents service results and explicit analyst actions. Keep ingestion, rules, graphs, scoring, alert lifecycle, storage, cases, reports and replay separate. CLI wrappers in `scripts` delegate to domain services. Policy files in `config` declare demonstration thresholds, not legal requirements.
 
-## Functionality and ownership
-Keep ingestion, quality checks, rules, graph analysis, priority scoring, alert lifecycle, investigation views, case workflow, storage, reports, replay and evaluation separate. Business logic belongs in `src/fintrace`; Streamlit presents service outputs.
+## Data and evidence invariants
 
-## Required invariants
-- Account keys include bank and account identifiers, both stored as strings.
-- Preserve source row lineage and duplicate transactions unless an explicit ingestion policy establishes that an import is repeated.
-- Quarantine invalid rows; do not silently fix financial values or timestamps.
-- Amounts use declared fixed precision and remain separated by currency.
-- Preserve original timestamp representation and precision. Require a timezone policy rather than assuming UTC.
-- IBM laundering labels and supplied pattern annotations belong exclusively to benchmark evaluation. No detector or user-facing score may read them.
-- Evidence uses only records available at the analysis cutoff. Earlier replay results must not change because of future records.
-- Ordinary graph reachability is not a temporal transfer path; all evidence paths need ordered timestamps.
-- Bound cycle searches, path depth, neighbour expansion and rendered graph size; disclose incomplete results.
-- Context unavailable in IBM is optional and explicitly absent, never fabricated.
-- An alert is a suspicion for review. Do not claim guilt, exact source-of-funds attribution, or confirmed mule status.
-- Scores are fixed-policy review priorities, never probabilities.
-- Do not transmit reports, file regulatory submissions, or freeze accounts.
-- Do not download or commit source datasets as part of routine source changes.
+- Preserve exact string bank/account pairs, source row lineage and duplicate payments. Never rewrite identifiers to match publisher metadata; reconciliation candidates remain review-only.
+- Quarantine invalid financial values/timestamps without rounding or silent repair. Use fixed-precision Decimal amounts; keep paid/received values and currencies separate.
+- Preserve original timestamp representation/precision and require an explicit timezone policy. Unknown source coverage stays unknown; first observed activity does not establish account opening or dormancy.
+- IBM labels and supplied pattern annotations remain in isolated ingestion artifacts. No detection, scoring, investigation, report or replay service may read them. Do not delete retained label artifacts: completed ingestion inventories verify them on reuse.
+- Evidence must precede the exclusive analysis cutoff. Earlier replay outputs must not change because of future records. Temporal evidence paths require strictly increasing timestamps; tied events do not prove transfer order.
+- Bound input size, path depth, cycle search, neighbour expansion and rendered graphs. Fail oversized inputs or disclose incomplete searches; never silently sample.
+- Missing customer identities, ownership, devices, expected income and independent intelligence remain unavailable. Do not infer these from synthetic account metadata.
+- Findings are suspicions for review; scores are fixed-policy priorities, never probabilities or guilt determinations. Do not claim exact source-of-funds attribution or confirmed mule status.
+- Keep all local datasets, generated artifacts and analyst history unless explicitly authorized to remove them. Do not download or commit source datasets, DuckDB files, exports, caches, credentials or screenshots.
 
-## Working agreements
-Every maintained project directory must have its own `AGENTS.md` with purpose, input/output contracts, functionality, and local constraints. Feature contract directories also specify proposed callable interfaces, examples, errors and acceptance criteria. Update those contracts with implementation changes.
+## Service constraints
 
-Keep scaffolds visibly marked pending. Add meaningful temporal, currency, lineage and evidence tests when implementing behaviour. Run `python scripts/check_scaffold.py` for documentation/structure changes; run relevant Pytest checks after implementation exists. Do not report absent tests or placeholder modules as completed functionality.
+Verify completed input manifests, label-free schemas, dataset/cutoff/policy identities and artifact hashes before reuse. Incomplete writes must not appear complete. Source data is immutable; read-only dashboard browsing must not create stores or outputs.
 
-## Useful references
-- `README.md`: approved scope and setup.
-- `docs/data_contracts.md`: shared records and isolation boundaries.
-- `docs/features/*/README.md`: feature inputs, outputs and behaviour.
-- `config/`: illustrative policy, not jurisdictional requirements.
+Alert and case writes require explicit actor/time/reason and expected-version checks. Case request IDs are idempotent; retain immutable versions and append-only audit events. Never fabricate analyst actions in the uploaded-data store. Reports resolve source evidence, escape HTML, neutralize spreadsheet formulas and publish atomically. Replay reuses bounded batch services, commits isolated alerts before checkpoint advancement, and rejects changed source/policy/audit identities.
+
+Preserve immutable run compatibility when cleaning code: existing disabled optional-rule keys remain accepted in version-1 policy files so retained checkpoints can resume with their original policy bytes. Enabling a removed optional service must fail explicitly. No reports are transmitted, regulatory submissions filed or accounts frozen. No automatic deployment or external notifications.
+
+## Verification and documentation
+
+Keep one root `AGENTS.md` and one root `README.md`; avoid recreating per-folder instruction or README files. Update the consolidated contracts when behavior changes. Preserve temporal, currency, lineage, evidence, persistence and UI tests. Use small synthetic fixtures for writes.
+
+Run `python scripts/check_scaffold.py` for structure, Python syntax, TOML, dependency and local-link checks. Run relevant Pytest checks for implementation changes; run the full suite for cross-cutting cleanup. Structure checks alone do not prove runtime functionality. Never report removed or unavailable services as implemented.

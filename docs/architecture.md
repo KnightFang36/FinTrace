@@ -1,7 +1,7 @@
 # Architecture
 
 ## Status and execution boundary
-Data ingestion/validation and deterministic cutoff rule snapshots are implemented. Temporal graph analysis and bounded PNG rendering are implemented through scripts/run_graphs.py. Fixed-policy priorities and transactional alert persistence are implemented through scripts/manage_alerts.py. Snapshot-scoped account/network read models and the seven-page Streamlit workspace are implemented. Case services use transactional version/audit storage; reports resolve verified financial rows and publish locally; historical cutoff replay uses isolated alerts and durable checkpoints. General orchestration, full-history account querying and benchmark evaluation remain pending. scripts/run_rules.py is the working rule CLI.
+Data ingestion/validation and deterministic cutoff rule snapshots are implemented. Temporal graph analysis and bounded PNG rendering are implemented through scripts/run_graphs.py. Fixed-policy priorities and transactional alert persistence are implemented through scripts/manage_alerts.py. Snapshot-scoped account/network read models and the seven-page Streamlit workspace are implemented. Case services use transactional version/audit storage; reports resolve verified financial rows and publish locally; historical cutoff replay uses isolated alerts and durable checkpoints. General orchestration, full-history account querying and benchmark metrics are outside the maintained scope. scripts/run_rules.py is the working rule CLI.
 
 ## Layers
 1. Ingestion verifies source headers and provenance; validation separates acceptable records from quarantine.
@@ -9,15 +9,14 @@ Data ingestion/validation and deterministic cutoff rule snapshots are implemente
 3. Rules and temporal graph services consume only transactions available at an explicit analysis cutoff.
 4. Priority scoring accounts for each eligible rule family once; alerts reference findings and score contributions.
 5. Investigation, cases and reporting use service read models, never independent dashboard calculations.
-6. Evaluation joins frozen outputs with separately stored benchmark labels after detection.
-7. Replay invokes the same detection services against increasing event cutoffs.
+6. Replay invokes the same detection services against increasing event cutoffs.
 
 ## Dependency direction
-`app -> investigations/cases/reporting -> alerts/scoring -> rules/graph/context -> storage/contracts`.
+`app -> investigations/cases/reporting -> alerts/scoring -> rules/graph -> storage/contracts`.
 
-Ingestion writes normalized records and a physically separate benchmark-label artifact. Evaluation may read both artifacts. Rules, graphs, context, scoring, alerts, investigations and replay must never read benchmark labels. Keep raw labels out of ordinary storage queries and dashboard data.
+Ingestion writes normalized records and a physically separate benchmark-label artifact. Retained label artifacts support ingestion integrity checks; no metric service is maintained. Rules, graphs, scoring, alerts, investigations, reports and replay must never read benchmark labels. Keep raw labels out of ordinary storage queries and dashboard data.
 
-contracts.py defines exact account/transaction records, findings, feature coverage and rule results. rules/engine.py evaluates six core rules and explicit capability gates; rules/runner.py verifies and projects completed detection Parquet before publishing snapshot artifacts. pipeline.py remains reserved for later combined orchestration. All deterministic operations use stable ordering and reproducible identifiers.
+contracts.py defines exact account/transaction records, findings, feature coverage and rule results. rules/engine.py evaluates six core rules and explicit capability gates; rules/runner.py verifies and projects completed detection Parquet before publishing snapshot artifacts. Operational scripts invoke the separate services explicitly. All deterministic operations use stable ordering and reproducible identifiers.
 
 ## Storage and identity
 Use Parquet for normalized datasets and DuckDB for local queryable evidence and case tables. Source data is immutable. Dataset versions are content-addressed by source hashes plus normalization configuration. Derive stable transaction IDs from dataset ID, relative source-file identity and source record number; do not hash only the transfer values, because identical-valued payments can be separate events.
@@ -38,8 +37,8 @@ Keep an account MultiDiGraph with a distinct keyed edge per transfer. Build a se
 
 Apply depth, edge, expansion and runtime budgets before unbounded exploration. Results state whether they are complete, truncated, skipped or unavailable. Charts use deterministic layouts and bounded neighbourhoods; graph statistics are descriptive context rather than standalone crime conclusions.
 
-## Optional context
-External entity links and reference intelligence carry provenance, effective dates and observed-at dates. Use only information available at the cutoff. Sanctions/PEP candidate screening is independent from transaction-pattern detection and is disabled by default.
+## Scope limits
+Account investigation covers selected snapshot evidence and graph-window transfers. No independently verified customer context, reference screening or benchmark metrics are provided. Preserve absent fields as unavailable.
 
 ## Audit and analyst actions
 Persist run ID, dataset hash, configuration hash, software version, cutoff and coverage with outputs. Case actions append actor, timestamp, previous state, new state and reason. Corrections append events rather than erasing history. Investigator review never automatically changes configured thresholds.

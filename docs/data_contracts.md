@@ -1,6 +1,6 @@
 # Shared data contracts
 
-Source manifests, normalized transaction/account records, ingestion validation artifacts, core rule findings, feature coverage, RuleResult, temporal graph evidence, fixed-policy priorities and audited alerts are implemented. Versioned case records, general local report exports and replay checkpoints are implemented; benchmark measurements remain planned. Investigation read models expose existing snapshot evidence without fabricating these pending services.
+Source manifests, normalized transaction/account records, ingestion validation artifacts, core rule findings, feature coverage, RuleResult, temporal graph evidence, fixed-policy priorities and audited alerts are implemented. Versioned case records, general local report exports and replay checkpoints are implemented; benchmark measurements are outside scope. Investigation read models expose existing snapshot evidence.
 
 ## Common conventions
 - Identifiers are strings. Account keys contain separate `bank_id` and `account_id` components.
@@ -13,7 +13,7 @@ Source manifests, normalized transaction/account records, ingestion validation a
 ## DatasetManifest
 Input: manually supplied provenance plus file metadata computed at ingestion.
 
-Implemented source-manifest fields: `schema_version`, `dataset_id`, `variant`, `synthetic`, `source_url`, `acquired_at`, `source_files[]` with `relative_path`, `sha256`, `byte_count` and exact ordered `header`, `source_terms`, `timezone_policy`, `timestamp_precision`, `observation_intervals[]`, `known_gaps[]`, `normalization_version`. See [the version-1 schema](../data/manifest.schema.json) and [data workflow](../data/README.md). Version 1 supports one CSV; optional benchmark annotations require their own future provenance contract.
+Implemented source-manifest fields: `schema_version`, `dataset_id`, `variant`, `synthetic`, `source_url`, `acquired_at`, `source_files[]` with `relative_path`, `sha256`, `byte_count` and exact ordered `header`, `source_terms`, `timezone_policy`, `timestamp_precision`, `observation_intervals[]`, `known_gaps[]`, `normalization_version`. See [the version-1 schema](../data/manifest.schema.json) and [data workflow](../README.md#local-data-workflow). Version 1 supports one CSV; source annotations are separately retained and structurally audited; no matching service is provided.
 
 Output: immutable manifest and reproducible source identity. An unset timezone policy blocks timestamp-dependent analysis. Coverage may be declared unknown; history-dependent features then remain unavailable.
 
@@ -51,11 +51,6 @@ These are observation facts, not verified opening date, customer identity, accou
 The optional publisher registry preserves Bank Name, Bank ID, Account Number, Entity ID and Entity Name as exact strings, with source checksum/record number, schema/run/source-dataset identity and synthetic=true. It is stored separately from observed detection accounts.
 
 Candidate links preserve both observed and publisher bank IDs. Status is exact_source_key, zero_padding_candidate, ambiguous or unmatched; candidate_count exposes conflicts. Numeric zero-padding equivalence is an explicit diagnostic and does not rewrite account keys or establish verified identity. Pattern annotations and transaction laundering labels are never inputs to this join.
-
-## OptionalCustomer and EntityLink
-Customer fields: `customer_id`, `entity_type`, `name`, `jurisdiction`, `expected_activity_policy`, `source_id`, `effective_from`, `effective_to`, `observed_at`. All unprovided attributes remain null.
-
-Link fields: `account_key`, `link_type`, `link_value_token`, `source_id`, `effective_from`, `effective_to`, `observed_at`. Supported link types may include device, IP, beneficiary, identity or ownership. A shared IP alone does not establish shared control.
 
 ## ValidationIssue and QualityReport
 Issue fields: `issue_id`, source identity, record number, `field`, `code`, `severity`, `message`, `disposition`.

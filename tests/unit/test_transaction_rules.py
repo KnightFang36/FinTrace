@@ -172,14 +172,13 @@ class RuleBoundaryTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Unknown context"):
             run([], "fan_in", context={"labels": [1]})
 
-    def test_unknown_history_and_unimplemented_features_are_visible(self):
-        policy = policy_for("burst", "dormant_activation", "layering", "cash_out")
+    def test_unknown_history_and_separate_graph_analysis_are_visible(self):
+        policy = policy_for("burst", "dormant_activation", "layering")
         result = run([transaction("one")], policy=policy)
         status = {item.feature_id: item.status for item in result.coverage}
         self.assertEqual(status["burst"], "unavailable")
         self.assertEqual(status["dormant_activation"], "unavailable")
         self.assertEqual(status["layering"], "unavailable")
-        self.assertEqual(status["cash_out"], "unavailable")
 
     def test_input_and_finding_evidence_budgets(self):
         policy = policy_for("fan_in")

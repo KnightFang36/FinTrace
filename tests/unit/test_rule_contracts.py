@@ -63,14 +63,18 @@ class RuleContractTests(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, "accepts only 'enabled'.*graph\\.toml"):
                         validate_policy(policy)
 
-    def test_optional_context_rules_reject_unimplemented_parameters(self):
-        # cash_out, profile_mismatch and known_exposure have no callable implementation yet.
+    def test_legacy_optional_sections_reject_parameters_and_activation(self):
+        # Existing disabled policy bytes remain loadable, but removed services cannot run.
         for rule in OPTIONAL_RULES:
             policy = self.policy()
             policy[rule]["window_minutes"] = 60
             with self.subTest(rule=rule):
                 with self.assertRaisesRegex(ValueError, "accepts only 'enabled'"):
                     validate_policy(policy)
+            policy = self.policy()
+            policy[rule]["enabled"] = True
+            with self.assertRaisesRegex(ValueError, "cannot be enabled"):
+                validate_policy(policy)
 
     def test_graph_rule_sections_still_require_an_explicit_enabled_flag(self):
         policy = self.policy()

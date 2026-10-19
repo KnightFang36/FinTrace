@@ -84,7 +84,7 @@ with st.sidebar:
         datasets = sorted({item["dataset_id"] for item in model["priorities"].values()})
         for dataset in datasets:
             st.caption(f"Dataset: {dataset}")
-    st.caption("Benchmark evaluation and optional context services remain pending.")
+    st.caption("Account transfers cover the selected graph window; customer profiles are unavailable.")
 
 if message := st.session_state.pop("review_saved", None):
     st.success(message)

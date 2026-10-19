@@ -7,6 +7,7 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 CORE_RULES = ("pass_through", "fan_in", "fan_out", "repeated_splitting", "burst", "dormant_activation")
+# Legacy disabled keys preserve frozen version-1 policy/checkpoint compatibility.
 OPTIONAL_RULES = ("cash_out", "profile_mismatch", "known_exposure")
 GRAPH_RULES = ("layering", "circular_flow", "coordinated_group")
 ALL_RULES = CORE_RULES + OPTIONAL_RULES + GRAPH_RULES
@@ -56,13 +57,14 @@ def validate_policy(policy: dict) -> dict:
         if not isinstance(settings, dict) or type(settings.get("enabled")) is not bool:
             raise ValueError(f"{rule}.enabled must be explicit boolean")
         if rule not in CORE_RULES:
-            # Graph rules read thresholds from config/graph.toml; optional context rules
-            # are not implemented. Neither honors parameters from this file, so accepting
-            # them would silently discard an operator's edit.
+            # Graph thresholds live in graph.toml. Legacy optional sections may
+            # remain disabled so existing immutable policies/checkpoints still load.
+            if rule in OPTIONAL_RULES and settings["enabled"]:
+                raise ValueError(f"{rule} is outside the maintained scope and cannot be enabled")
             unknown = sorted(set(settings) - {"enabled"})
             if unknown:
                 location = ("config/graph.toml" if rule in GRAPH_RULES
-                            else "the rule's feature contract")
+                            else "no supported configuration (removed service)")
                 raise ValueError(
                     f"{rule} accepts only 'enabled' in rules.toml; configure {unknown} in {location}"
                 )
