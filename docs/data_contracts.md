@@ -1,6 +1,6 @@
 # Shared data contracts
 
-Source manifests, normalized transaction/account records, ingestion validation artifacts, core rule findings, feature coverage and RuleResult are implemented. Graph evidence, priorities, alerts, cases and other downstream records remain planned.
+Source manifests, normalized transaction/account records, ingestion validation artifacts, core rule findings, feature coverage, RuleResult, temporal graph evidence, fixed-policy priorities and audited alerts are implemented. Case records, general report exports, replay checkpoints and benchmark measurements remain planned. Investigation read models expose existing snapshot evidence without fabricating these pending services.
 
 ## Common conventions
 - Identifiers are strings. Account keys contain separate `bank_id` and `account_id` components.
