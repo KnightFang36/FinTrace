@@ -22,7 +22,7 @@ The dashboard reads `data/processed/alerts.duckdb` and completed analysis artifa
 
 - Streaming IBM CSV normalization, provenance checks, exact account identifiers, financial validation, quarantine and row lineage.
 - Six transaction rules: observed pass-through, fan-in, fan-out, repeated payments, bursts and dormant activation. Historical rules require declared observation coverage.
-- Bounded chronological chains, cycles and coordinated groups; descriptive graph statistics and interactive neighbourhoods with visible limits.
+- Bounded chronological chains, cycles and coordinated groups; descriptive graph statistics and a default combined network of the top ten active-alert accounts, with bounded neighbourhoods and visible limits.
 - Auditable priority contributions, deduplicated persistent alerts and version-checked review transitions.
 - Snapshot account dossiers and graph-window transfer timelines.
 - Versioned cases with frozen evidence, notes, assignments, closure/reopen and append-only audit history.
