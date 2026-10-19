@@ -219,3 +219,17 @@ Benchmark metrics, independent context/screening and full-history account queryi
 The cleanup removed unfinished evaluation/context/screening, optional detector and general pipeline/repository scaffolds. The seven-page workspace and implemented domain services remain. There is one root instruction file and one root README; contracts and verification records are consolidated in this directory. All source datasets, normalized artifacts, stores, reports and replay checkpoints were left untouched.
 
 The full regression suite passed **171 tests and 46 subtests** after cleanup. Structure checks passed for 23 maintained directories, six documents and 85 Python files, including TOML policy/dependency checks and local links. Disabled legacy optional policy sections remain loadable; attempting to enable a removed service fails explicitly. Existing policy file bytes were not changed.
+
+## Default top-ten alerted-account network
+
+The network explorer now defaults to the ten highest-priority distinct accounts with active alerts, together with observed graph-window counterparties. Orange nodes mark ranked accounts; teal nodes mark counterparties. Selection uses fixed-policy priority with deterministic exact bank/account ties, never laundering labels. Single-account exploration and finding highlights remain available. Missing-window subjects remain isolated and explicitly identified; no transfers are invented.
+
+Read-only HI-Medium verification returned ten ranked accounts, 23 displayed accounts and 36 observed transfers within the unchanged display budgets, with no ranked subject missing from the selected window. The full regression suite passed 175 tests and 46 subtests, including new ranking, duplicate-alert, missing-window, bank-identity, fair-expansion, budget, ordering and default-route checks. Structure/link checks passed. No datasets, policy weights or analyst records were changed.
+
+Headless Chrome verified that the live default graph renders ten ranked subjects, 23 nodes and 36 edges, and that switching to Single account and back succeeds without JavaScript errors. No analyst action was submitted. Preview screenshots remain local and ignored by Git.
+
+## Stable graph layout and full-screen controls
+
+NetworkX now computes bounded node coordinates once with a fixed seed. Browser physics and dynamic edge simulation are disabled, preventing idle wobble while retaining manual dragging, panning, zoom and tooltips. The graph toolbar offers Full screen, Exit full screen and Fit graph; Escape exits the expanded view. Resizing and fitting preserve node coordinates.
+
+Eighteen focused investigation/UI tests passed, including input-order-independent coordinates. Headless Chrome verified unchanged idle positions, disabled physics, native full-screen enlargement from 1,140 × 560 to 1,600 × 1,052 pixels, fit without node movement, button/keyboard exit and no JavaScript errors. Structure/link checks passed. Screenshots remain ignored local artifacts. No financial data, detection policy or analyst records were modified.

@@ -57,3 +57,67 @@ def test_embedded_graph_escapes_external_labels_and_has_no_remote_script_sources
     assert malicious not in html
     assert 'src="https://' not in html and 'href="https://' not in html
     assert "vis.Network" in html
+
+
+def alerted_model(accounts):
+    return {'priorities': {content_id(account): {'account': account, 'score': score}
+                           for account, score, _ in accounts},
+            'alerts': [{'subject': account, 'state': state} for account, _, state in accounts]}
+
+
+def test_combined_network_ranks_unique_active_alert_subjects_and_reserves_top_ten():
+    from fintrace.investigations.network import get_alerted_network_view
+    accounts = [({'bank_id': '01', 'account_id': f'A{i:02}'}, 100-i, 'open') for i in range(12)]
+    model = alerted_model(accounts)
+    model['alerts'].append(dict(model['alerts'][0]))  # Two alerts do not count as two accounts.
+    model['priorities'][content_id({'bank_id': '01', 'account_id': 'unalerted'})] = {
+        'account': {'bank_id': '01', 'account_id': 'unalerted'}, 'score': 100}
+    graph = {'edges': [edge(str(i), f'A{i:02}', 'hub') for i in range(12)]}
+    view = get_alerted_network_view(graph, model, max_nodes=10, max_edges=5)
+    assert len(view['nodes']) == 10 and all(item['seed'] for item in view['nodes'])
+    assert [item['account']['account_id'] for item in view['ranked_accounts']] == [f'A{i:02}' for i in range(10)]
+    assert view['ranked_accounts'][0]['active_alerts'] == 2
+    assert not view['edges']  # The omitted hub is not replaced with invented direct links.
+    assert view['partial']
+
+
+def test_combined_network_missing_window_accounts_are_explicit_and_bank_keys_remain_distinct():
+    from fintrace.investigations.network import get_alerted_network_view
+    accounts = [({'bank_id': bank, 'account_id': 'A'}, 25, state)
+                for bank, state in [('1', 'open'), ('01', 'in_review'), ('02', 'closed')]]
+    view = get_alerted_network_view({'edges': [edge('t', 'A', 'B')]}, alerted_model(accounts))
+    assert [item['account']['bank_id'] for item in view['ranked_accounts']] == ['01', '1']
+    assert view['missing_seeds'] == [{'bank_id': '1', 'account_id': 'A'}]
+    assert len([node for node in view['nodes'] if node['seed']]) == 2
+    assert 'No transfers in the selected graph window' in network_html(view)
+    assert 'Review priority 25/100' in network_html(view)
+    assert all(row['transaction']['sender']['bank_id'] == '01' for row in view['edges'])
+
+
+def test_combined_network_balances_neighbours_and_edges_and_is_input_order_independent():
+    from fintrace.investigations.network import get_alerted_network_view
+    accounts = [({'bank_id': '01', 'account_id': name}, score, 'open') for name, score in [('A', 50), ('B', 25)]]
+    graph = {'edges': [edge(f'a{i}', 'A', f'X{i}') for i in range(20)] + [edge('b', 'B', 'Y')]}
+    model = alerted_model(accounts)
+    view = get_alerted_network_view(graph, model, max_nodes=4, max_edges=2, direction='outgoing')
+    assert len(view['nodes']) == 4 and len(view['edges']) == 2
+    assert 'Y' in {item['account']['account_id'] for item in view['nodes']}
+    assert 'b' in {item['id'] for item in view['edges']}
+    assert view == get_alerted_network_view({'edges': list(reversed(graph['edges']))}, model,
+                                           max_nodes=4, max_edges=2, direction='outgoing')
+    assert not get_alerted_network_view(graph, {'priorities': {}, 'alerts': []})['nodes']
+
+
+def test_graph_layout_positions_are_stable_across_input_order():
+    import json
+    import re
+    graph = {'edges': [edge('a', 'A', 'B'), edge('b', 'B', 'C')]}
+    view = get_network_view(graph, {'bank_id': '01', 'account_id': 'A'}, hops=2)
+    def positions(html):
+        match = re.search(r'nodes = new vis.DataSet\((\[.*?\])\);', html)
+        assert match
+        return {item['id']: (item['x'], item['y']) for item in json.loads(match.group(1))}
+    first = positions(network_html(view))
+    reordered = {**view, 'nodes': list(reversed(view['nodes'])), 'edges': list(reversed(view['edges']))}
+    assert first == positions(network_html(reordered))
+    assert len(set(first.values())) == len(view['nodes'])

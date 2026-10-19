@@ -166,3 +166,23 @@ def test_ui_warns_how_many_snapshots_are_hidden(tmp_path, monkeypatch):
     at = AppTest.from_file(ROOT / "app/streamlit_app.py", default_timeout=30).run()
     assert not at.exception
     assert any("2 older snapshots are hidden" in item.value for item in at.warning)
+
+
+def test_network_page_defaults_to_combined_alerted_accounts(workspace, monkeypatch):
+    from unittest.mock import patch
+    path, snapshot, _ = workspace
+    graph = {'run_id': 'fixture', 'window_start': START.isoformat(), 'cutoff': END.isoformat(),
+             'edges': [{'transaction_id': 'tx', 'sender': {'bank_id': '01', 'account_id': 'A'},
+                        'receiver': {'bank_id': '01', 'account_id': 'B'}, 'occurred_at': START.isoformat(),
+                        'amount_paid': '10.00', 'amount_received': '10.00',
+                        'payment_currency': 'USD', 'receiving_currency': 'USD'}]}
+    with patch('fintrace.investigations.dashboard.load_graph_evidence', return_value=graph):
+        at = AppTest.from_file(ROOT/'app/streamlit_app.py', default_timeout=30).run()
+        at.radio(key='navigation').set_value('Network explorer').run()
+        assert not at.exception
+        assert at.radio(key='network_view_mode').value == 'Top 10 alerted accounts'
+        assert not any(widget.label == 'Seed account' for widget in at.selectbox)
+        assert any('not confirmed mules' in item.value for item in at.caption)
+        at.radio(key='network_view_mode').set_value('Single account').run()
+        assert not at.exception
+        assert any(widget.label == 'Seed account' for widget in at.selectbox)
