@@ -1,19 +1,28 @@
-/* Local styles; no remote fonts, scripts or imagery. */
-[data-testid="stSidebar"] { background: #132c3d; }
-[data-testid="stSidebar"] [data-testid="stMarkdownContainer"],
-[data-testid="stSidebar"] label, [data-testid="stSidebar"] h1,
-[data-testid="stSidebar"] [data-testid="stCaptionContainer"] { color: #e0edf1; }
-[data-testid="stSidebar"] [data-testid="stRadio"] label { padding: .45rem 0; }
-[data-testid="stSidebar"] [data-baseweb="select"] { color: #182f42; }
-.block-container { max-width: 1440px; padding-top: 2.2rem; padding-bottom: 3rem; }
-h1 { letter-spacing: -.045em; font-weight: 700; }
-h2, h3 { letter-spacing: -.025em; }
-[data-testid="stMetric"] { background: white; border: 1px solid #e1e8ee; border-radius: 12px; padding: 1.2rem; }
-[data-testid="stMetricValue"] { font-weight: 650; letter-spacing: -.04em; }
-[data-testid="stMetricLabel"] { color: #597084; }
-[data-testid="stVerticalBlockBorderWrapper"] > div { border-radius: 12px; }
-[data-testid="stDataFrame"] { border-radius: 8px; }
-.ft-brand { display:flex; align-items:center; gap:12px; margin-bottom:12px; color:#f5fbff; font-size:25px; font-weight:700; letter-spacing:-1px; }
-.ft-mark { background:#1ca39b; color:#fff; border-radius:9px; width:38px; height:38px; display:grid; place-items:center; font-size:16px; letter-spacing:0; }
-.ft-rule { height:1px; background:#315064; margin:18px 0; }
-[data-testid="stSidebar"] button p { color: #182f42 !important; }
+/* Local SOC-style investigation theme. No remote resources. */
+:root { color-scheme: dark; --ft-bg: #090f19; --ft-panel: #101b2a; --ft-border: #2a3e55; --ft-text: #e8f0fa; --ft-muted: #aabbd0; --ft-accent: #38d9c5; }
+[data-testid="stAppViewContainer"], [data-testid="stMain"] { background: var(--ft-bg); }
+[data-testid="stHeader"] { background: #090f19ee; border-bottom: 1px solid #203047; }
+[data-testid="stSidebar"] { background: #0d1623; border-right: 1px solid var(--ft-border); }
+.block-container { max-width: 1560px; padding-top: 5rem; padding-bottom: 3rem; }
+h1 { color: #f4f8ff; letter-spacing: -.035em; font-weight: 700; }
+h2, h3 { color: var(--ft-text); letter-spacing: -.02em; }
+[data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] p { color: var(--ft-muted); }
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"], [data-testid="stSidebar"] [data-testid="stCaptionContainer"] p { color: #afc1d6; }
+[data-testid="stSidebar"] [data-testid="stRadio"] label { padding: .5rem .65rem; border-radius: 6px; color: var(--ft-text); }
+[data-testid="stSidebar"] [data-testid="stRadio"] label:hover { background: #182a3d; }
+[data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked) { background: #173537; outline: 1px solid #276461; }
+[data-testid="stMetric"] { background: linear-gradient(135deg, #132437, #101b2a); border: 1px solid var(--ft-border); border-top: 2px solid var(--ft-accent); border-radius: 8px; padding: 1.15rem 1.25rem; }
+[data-testid="stMetricValue"] { color: #f4f8ff; font-weight: 700; letter-spacing: -.025em; font-variant-numeric: tabular-nums; }
+[data-testid="stMetricLabel"] { color: #bed0e4; }
+[data-testid="stVerticalBlockBorderWrapper"] > div { border-radius: 8px; }
+[data-testid="stExpander"] { background: #101b2a; border-color: var(--ft-border); border-radius: 8px; }
+[data-testid="stDataFrame"] { border: 1px solid var(--ft-border); border-radius: 6px; }
+[data-testid="stVegaLiteChart"] { background: #101b2a; border-radius: 6px; }
+[data-testid="stButton"] button, [data-testid="stDownloadButton"] button { background: #192b40; border: 1px solid #3b536e; color: var(--ft-text); border-radius: 6px; min-height: 2.5rem; }
+[data-testid="stButton"] button:hover, [data-testid="stDownloadButton"] button:hover { background: #203d50; border-color: var(--ft-accent); color: #ffffff; }
+[data-testid="stButton"] button:focus-visible, [data-testid="stDownloadButton"] button:focus-visible { outline: 2px solid var(--ft-accent); outline-offset: 3px; }
+[data-testid="stAlert"] { border-radius: 6px; }
+code, pre { font-variant-numeric: tabular-nums; }
+.ft-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; color: #f4f8ff; font-size: 25px; font-weight: 700; letter-spacing: -.7px; }
+.ft-mark { background: #153c3b; color: #66f1df; border: 1px solid #287c72; border-radius: 7px; width: 38px; height: 38px; display: grid; place-items: center; font-size: 16px; letter-spacing: 0; }
+.ft-rule { height: 1px; background: var(--ft-border); margin: 18px 0; }

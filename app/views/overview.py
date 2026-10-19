@@ -5,9 +5,9 @@ from app.components.filters import account_label, humanize
 
 
 def render(model):
-    st.caption("WORKSPACE / OVERVIEW")
-    st.title("Follow the evidence.")
-    st.write("Review transaction patterns, understand account priorities, and trace the transfers behind each alert.")
+    st.caption("INVESTIGATION OPERATIONS / OVERVIEW")
+    st.title("Investigation command center")
+    st.write("Prioritize alerts, inspect transaction evidence, and track analyst review.")
     summary = model["summary"]
     cols = st.columns(4)
     for col, label, value in zip(cols, ("Accounts for review", "Review alerts", "Evidence findings", "Open / in review"),
@@ -18,7 +18,7 @@ def render(model):
         with st.container(border=True):
             st.subheader("Priority distribution")
             st.bar_chart([{ "Band": humanize(band), "Accounts": count} for band, count in summary["by_band"].items()],
-                         x="Band", y="Accounts", color="#149d99", sort=False, height=260)
+                         x="Band", y="Accounts", color="#38d9c5", sort=False, height=260)
             st.caption("Fixed policy points, capped at 100. Scores are investigation priorities, not probabilities.")
     with right:
         with st.container(border=True):
