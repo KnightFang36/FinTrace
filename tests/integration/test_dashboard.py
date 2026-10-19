@@ -104,3 +104,54 @@ def test_empty_workspace_never_creates_database(tmp_path, monkeypatch):
     assert not at.metric
     assert any("No alert store found" in item.value for item in at.info)
     assert not missing.exists()
+
+
+def test_snapshot_catalog_keeps_newest_cutoffs_and_discloses_hidden_count(tmp_path):
+    """IDs are content hashes, so ordering by them would drop arbitrary cutoffs."""
+    path = tmp_path / "catalog.duckdb"
+    policy = tomllib.loads((ROOT / "config/alerts.toml").read_text())
+    scoring = load_scoring_policy(ROOT / "config/scoring.toml")
+    count = 205
+    # The fixture finding spans [START, end), so the first usable cutoff is START + 1h.
+    with AlertStore(path) as store:
+        for index in range(1, count + 1):
+            end = START + timedelta(hours=index)
+            value = finding(f"f{index}", end)
+            store.import_analysis([value], score_accounts([value], {"temporal_graphs": {"status": "unavailable"}},
+                                                          scoring, {"start": START, "end": end}),
+                                  policy, actor="fixture", at=end)
+    catalog = list_snapshots(path)
+    cutoffs = [item["cutoff"] for item in catalog["items"]]
+    # The hidden snapshots must be the oldest ones, never arbitrary middle cutoffs.
+    assert cutoffs == [(START + timedelta(hours=hour)).isoformat()
+                       for hour in range(count, count - 200, -1)]
+    assert catalog["truncated"] is True
+    assert len(catalog["items"]) == 200
+    assert catalog["total"] == count
+    assert catalog["excluded"] == count - 200
+
+
+def test_snapshot_catalog_rejects_malformed_payload_with_actionable_error(tmp_path):
+    path = tmp_path / "malformed.duckdb"
+    with AlertStore(path) as store:
+        store.connection.execute("INSERT INTO ft_priority_runs VALUES (?,?)", ["priorities-broken", "not json"])
+    with pytest.raises(ValueError, match="malformed priority snapshot"):
+        list_snapshots(path)
+
+
+def test_ui_warns_how_many_snapshots_are_hidden(tmp_path, monkeypatch):
+    path = tmp_path / "large-catalog.duckdb"
+    policy = tomllib.loads((ROOT / "config/alerts.toml").read_text())
+    scoring = load_scoring_policy(ROOT / "config/scoring.toml")
+    with AlertStore(path) as store:
+        for index in range(1, 203):
+            end = START + timedelta(hours=index)
+            value = finding(f"f{index}", end)
+            store.import_analysis([value], score_accounts([value], {"temporal_graphs": {"status": "unavailable"}},
+                                                          scoring, {"start": START, "end": end}),
+                                  policy, actor="fixture", at=end)
+    monkeypatch.setenv("FINTRACE_ALERT_DATABASE", str(path))
+    monkeypatch.setenv("FINTRACE_PROCESSED_ROOT", str(tmp_path))
+    at = AppTest.from_file(ROOT / "app/streamlit_app.py", default_timeout=30).run()
+    assert not at.exception
+    assert any("2 older snapshots are hidden" in item.value for item in at.warning)

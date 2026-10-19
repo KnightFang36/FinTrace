@@ -45,7 +45,7 @@ with st.sidebar:
     try:
         catalog = list_snapshots(DATABASE)
     except Exception as error:
-        catalog = {"items": [], "truncated": False}
+        catalog = {"items": [], "truncated": False, "excluded": 0}
         source_error = str(error)
     else:
         source_error = None
@@ -53,7 +53,7 @@ with st.sidebar:
                               format_func=lambda item: f"{item['cutoff'][:16].replace('T', ' ')} UTC · {item['id'][-8:]}",
                               disabled=not catalog["items"], key="snapshot_selection")
     if catalog["truncated"]:
-        st.warning("Snapshot catalog limited to 200 entries.")
+        st.warning(f"Newest 200 snapshots shown; {catalog['excluded']} older snapshots are hidden.")
     st.caption("IBM SYNTHETIC DATA")
     st.caption("Deterministic rules · NetworkX · Fixed policy priorities")
 
