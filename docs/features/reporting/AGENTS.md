@@ -1,7 +1,7 @@
 # Evidence reporting and exports contract instructions
 
 ## Purpose
-Maintain the authoritative contract in `README.md` for `src/fintrace/reporting/`. Implementation is pending.
+Maintain the authoritative contract in `README.md` for `src/fintrace/reporting/`. The local service, CLI and workspace integration are implemented.
 
 ## Inputs
 - Frozen account/alert/case snapshot, validated export formats and output destination.

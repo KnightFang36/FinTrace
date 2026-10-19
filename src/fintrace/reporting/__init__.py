@@ -1,1 +1,1 @@
-"""reporting: planned FinTrace service package; implementation pending."""
+"""Verified local evidence reports with exact financial records and safe export formats."""
