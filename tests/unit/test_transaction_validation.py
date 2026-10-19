@@ -53,3 +53,23 @@ class TransactionValidationTests(unittest.TestCase):
     def test_financial_function_does_not_accept_label_column(self):
         result = validate_transaction_fields(["x"] * 11, timezone_policy="UTC", timestamp_precision="minute")
         self.assertEqual(result.issues[0]["code"], "field_count")
+
+
+def test_field_count_issue_reports_the_observed_source_width():
+    """A narrowed field list must not hide the true source width from the operator."""
+    from fintrace.validation.transactions import validate_transaction_fields
+    # The adapter passes no financial fields for a widened row, but knows its real width.
+    result = validate_transaction_fields(
+        [], timezone_policy="UTC", timestamp_precision="minute", observed_field_count=13,
+    )
+    assert result.record is None
+    assert result.issues[0]["code"] == "field_count"
+    assert "source row has 13" in result.issues[0]["message"]
+
+
+def test_field_count_issue_defaults_to_the_supplied_width():
+    from fintrace.validation.transactions import validate_transaction_fields
+    result = validate_transaction_fields(
+        ["a"] * 9, timezone_policy="UTC", timestamp_precision="minute",
+    )
+    assert "source row has 9" in result.issues[0]["message"]
