@@ -33,7 +33,7 @@ REG, BOLD = fontfile(), fontfile(True)
 PDF_FONTS = {False: fitz.Font(fontfile=REG), True: fitz.Font(fontfile=BOLD)}
 prs = Presentation()
 prs.slide_width, prs.slide_height = Inches(16), Inches(9)
-prs.core_properties.title = 'FinTrace — Follow the evidence'
+prs.core_properties.title = 'FinTrace  -  Follow the evidence'
 prs.core_properties.subject = 'Four-person project demonstration'
 prs.core_properties.author = 'FinTrace team'
 pdf = fitz.open()
@@ -146,7 +146,7 @@ text(s, p, 'Explainable transaction investigation\nIBM synthetic data · Rules a
 s, p = new('One payment is not the story.', 2, 'Person 1', '0:25–1:10', 'Show this slide, then switch to Overview. Keep synthetic-data notice and snapshot visible.',
            'Several transfers together can reveal a pattern that one payment cannot. These are research records, not real customer data. The selected snapshot uses only transfers before an explicit time limit.')
 cols(s, p, [('Many senders', 'Several accounts pay one account.'), ('Fast forwarding', 'Money arrives, then moves onward.'), ('Connected transfers', 'A sequence links several accounts.')])
-text(s, p, 'A pattern is a reason to look closer—not proof of wrongdoing.', 242, 633, 1090, 27, True)
+text(s, p, 'A pattern is a reason to look closer - not proof of wrongdoing.', 242, 633, 1090, 27, True)
 
 s, p = new('A clear path from data to review', 3, 'Person 1', '1:10–1:35', 'Use this diagram briefly. Then return to Overview.',
            'Data preparation preserves source references and separates labels. Rules and chronological graph checks produce evidence. Fixed policy points prioritize review. The reviewer can inspect and record an action.')
@@ -180,7 +180,7 @@ text(s, p, 'Fixed points · Visible contributions · Related clues grouped', 242
 s, p = new('An account, in context', 7, 'Person 3', '4:35–5:35', 'LIVE APP: Account evidence → same bank/account pair → Observed transfers → Load graph-window transfers.',
            'Show priority, findings and linked alerts. Load the linked graph-window transfers. Totals remain separate by currency. They are not balances or a full account history. Verified customer information remains unavailable rather than fabricated.')
 cols(s, p, [('One evidence view', 'Priority, findings and linked alerts for the selected account.'), ('Precise transfers', 'Sender, receiver, time and both payment amounts.'), ('Honest boundaries', 'Currencies stay separate. Missing customer context stays missing.')])
-text(s, p, 'Observed transfers—not a balance or a complete account history.', 242, 643, 1110, 26, True)
+text(s, p, 'Observed transfers - not a balance or a complete account history.', 242, 643, 1110, 26, True)
 
 s, p = new('Connections need a time order.', 8, 'Person 3', '5:35–6:55', 'LIVE APP: Network explorer → same Seed account → Highlight finding → hover → Direction → hops 1 to 2 → displayed-transfer table.',
            'Dots are accounts; arrows are transfers. Orange edges identify selected evidence. Show exact references in the table. Connections alone are not chronological money flow: later transfers cannot explain earlier ones. Equal timestamps do not establish an order. Disclose partial searches and display caps.')
@@ -191,15 +191,15 @@ for i, (name, time) in enumerate([('Account A', '10:00'), ('Account B', '10:10')
     text(s, p, time, x + 25, 505, 230, 29, False, ORANGE)
     if i < 2:
         text(s, p, '→', x + 299, 392, 70, 44, True, ORANGE)
-text(s, p, 'Illustrative sequence—not a measured transaction from the dataset.', 242, 590, 1100, 24)
+text(s, p, 'Illustrative sequence - not a measured transaction from the dataset.', 242, 590, 1100, 24)
 text(s, p, 'LIVE DEMO  /  Network explorer', 242, 643, 1050, 24, True, ORANGE)
 
 s, p = new('The reviewer stays in control.', 9, 'Person 4', '6:55–7:55', 'LIVE APP, disposable database: Alert review → Review & audit → In review → Reviewer + reason → Save audited review once → show history.',
            'Use an open alert in a disposable demo copy. Save the reviewer and reason, then show the new event. Old events remain. Refresh does not submit twice. This is alert review, not complete case management. No automatic account freeze, bank contact or regulatory filing.')
 cols(s, p, [('Inspect', 'Read the finding and its limits before acting.'), ('Record', 'Name the reviewer, choose the status and give a reason.'), ('Keep the history', 'Time, actor, action and reason remain in the audit trail.')])
-text(s, p, 'LIVE DEMO  /  Review & audit — use the demo database only', 242, 643, 1110, 24, True, ORANGE)
+text(s, p, 'LIVE DEMO  /  Review & audit  -  use the demo database only', 242, 643, 1110, 24, True, ORANGE)
 
-s, p = new('Trust the checks—not a claim.', 10, 'Person 4', '7:55–8:45', 'Show this slide, then a fresh terminal test result. Do not type a fake result or memorize a test count.',
+s, p = new('Trust the checks - not a claim.', 10, 'Person 4', '7:55–8:45', 'Show this slide, then a fresh terminal test result. Do not type a fake result or memorize a test count.',
            'Labels are separated from detector inputs. Source references and exact amounts are preserved. Invalid rows go to quarantine. Automated checks cover time limits, evidence, workflow and the interface. Passing tests does not establish detection accuracy.')
 cols(s, p, [('No answer leakage', 'Benchmark labels never feed detectors or priority scores.'), ('Traceable evidence', 'Exact amounts, source references and visible analysis limits.'), ('Regression checks', 'Tests cover boundaries, saved review actions and screens.')])
 text(s, p, 'Tests check behaviour. They do not prove detection accuracy.', 242, 643, 1110, 27, True)
