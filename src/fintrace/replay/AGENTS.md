@@ -1,7 +1,7 @@
 # Chronological transaction replay implementation instructions
 
 ## Purpose
-Own the source service described in `docs/features/replay/README.md`. Modules are placeholders until implemented.
+Own the source service described in `docs/features/replay/README.md`. The feature service is implemented; keep its callable interface and limits synchronized with the feature contract.
 
 ## Inputs
 - Validated transactions ordered by event time and stable source identity.
@@ -22,3 +22,5 @@ Own the source service described in `docs/features/replay/README.md`. Modules ar
 
 ## Implementation constraints
 Follow root invariants and shared records. Implement the feature contract's failure cases and acceptance examples. Keep labels out of this service entirely. Persist source evidence and explicit coverage; do not conceal insufficient input as no suspicious activity. Do not add business logic to the dashboard. Update docs and relevant tests with implementation.
+
+Reuse rules/graph snapshot runners and alerts/runner import at ordered exclusive cutoffs. Keep replay alerts in a separate store, commit outputs before advancing the atomic checkpoint, and verify source/configuration and frozen outputs before resume. Timestamp ties enter together; changed source files reject resume. The UI advances one cutoff per explicit action.

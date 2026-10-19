@@ -1,7 +1,7 @@
 # Chronological transaction replay contract instructions
 
 ## Purpose
-Maintain the authoritative contract in `README.md` for `src/fintrace/replay/`. Implementation is pending.
+Maintain the authoritative contract in `README.md` for `src/fintrace/replay/`. The local service, CLI and workspace integration are implemented.
 
 ## Inputs
 - Validated transactions ordered by event time and stable source identity.

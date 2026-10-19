@@ -1,1 +1,1 @@
-"""replay: planned FinTrace service package; implementation pending."""
+"""Bounded historical cutoff replay with isolated alerts and durable checkpoints."""
