@@ -11,6 +11,15 @@
 | 4:35–6:55 | Person 3 | Account investigation and connected transfers | Account evidence → Network explorer |
 | 6:55–9:20 | Person 4 | Human review, engineering checks and conclusion | Review & audit → test results → Overview |
 
+## Slide deck
+
+- [Editable PowerPoint](PRESENTATION.pptx) — 12 slides with four-person speaker notes, timing and live-app cues.
+- [PDF preview](PRESENTATION.pdf) — matching static slides for checking the layout or presenting without PowerPoint.
+- The deck borrows the reference PDF's visual template: light background, orange layered bars, rounded cross motif, large headings and thin footer. It follows **our FinTrace demo flow**, not the reference talk's structure.
+- Slides are supporting visuals, not a replacement for the live demonstration. Switch to the app when a slide says **LIVE DEMO**. The footer identifies the presenter; Notes view contains timing and actions.
+- Replace Person 1–4 with your names. Liberation Sans substitutes for the reference's Aileron font. All PowerPoint text and shapes are editable; there are no embedded customer records or fabricated app screenshots.
+- Rebuild both files with `python docs/build_presentation.py` after installing the optional authoring dependencies `python-pptx` and `pymupdf`; Linux font lookup uses `fc-match`. These are authoring tools, not runtime app dependencies.
+
 ## Before recording — not spoken
 
 - Start the app using the setup in the [dashboard guide](features/dashboard/README.md). Use a prepared analysis snapshot with both rule and graph outputs already imported. Do not run the full data preparation during the video.
