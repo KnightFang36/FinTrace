@@ -37,7 +37,7 @@ with st.sidebar:
     st.html('<div class="ft-brand"><span class="ft-mark">FT</span>FinTrace</div>')
     st.caption("INVESTIGATION WORKSPACE")
     st.html('<div class="ft-rule"></div>')
-    page = st.radio("Workspace", ["Overview", "Alert review", "Account evidence", "Network explorer"], label_visibility="collapsed", key="navigation")
+    page = st.radio("Workspace", ["Overview", "Alert review", "Account evidence", "Network explorer", "Cases", "Reports", "Replay"], label_visibility="collapsed", key="navigation")
     st.html('<div class="ft-rule"></div>')
     st.caption("ANALYSIS SNAPSHOT")
     if st.button("Refresh workspace", width="stretch"):
@@ -84,7 +84,7 @@ with st.sidebar:
         datasets = sorted({item["dataset_id"] for item in model["priorities"].values()})
         for dataset in datasets:
             st.caption(f"Dataset: {dataset}")
-    st.caption("Cases, report workflows, replay and benchmark evaluation are pending.")
+    st.caption("Benchmark evaluation and optional context services remain pending.")
 
 if message := st.session_state.pop("review_saved", None):
     st.success(message)
@@ -107,6 +107,15 @@ elif page == "Alert review":
 elif page == "Account evidence":
     from app.views.account import render
     render(model, get_graph)
-else:
+elif page == "Network explorer":
     from app.views.network import render
     render(model, get_graph)
+elif page == "Cases":
+    from app.views.cases import render
+    render(model, DATABASE, refresh)
+elif page == "Reports":
+    from app.views.reports import render
+    render(model, DATABASE, PROCESSED, Path(os.environ.get("FINTRACE_EXPORT_ROOT", ROOT / "outputs")))
+else:
+    from app.views.replay import render
+    render(model, PROCESSED, ROOT)

@@ -1,6 +1,6 @@
 # Streamlit investigation dashboard
 
-**Status: overview, alert review, account evidence and interactive network pages implemented.** Cases, general report exports, evaluation and replay remain pending and are not routed as working pages. Owner: `app/`.
+**Status: overview, alert review, account evidence, interactive network, cases, reports and replay pages implemented.** Benchmark evaluation remains pending and is not routed as a working page. Owner: `app/`.
 
 ## Implemented interface
 
@@ -12,7 +12,7 @@ The workspace uses a dark operations theme with charcoal/navy surfaces, bright t
 
 ## Inputs
 
-An existing local `data/processed/alerts.duckdb` populated by `scripts/manage_alerts.py import`, immutable priority snapshots and the optional graph run linked by the selected snapshot. `FINTRACE_PROCESSED_ROOT` and `FINTRACE_ALERT_DATABASE` may select alternate local fixture/workspace paths. No datasets are downloaded, imported or analyzed automatically. The dashboard never opens benchmark labels or supplied pattern annotations.
+An existing local `data/processed/alerts.duckdb` populated by `scripts/manage_alerts.py import`, immutable priority snapshots and the optional graph run linked by the selected snapshot. `FINTRACE_PROCESSED_ROOT` and `FINTRACE_ALERT_DATABASE` may select alternate local fixture/workspace paths. No datasets are downloaded, imported or analyzed automatically on page load. Explicit replay actions invoke the historical services one cutoff at a time in a separate store. The dashboard never opens benchmark labels or supplied pattern annotations.
 
 ## Outputs
 
@@ -43,4 +43,11 @@ Displayed totals reconcile to stored service outputs. Snapshot selection cannot 
 
 ## Data availability
 
-The checked local IBM workspace contains 279 scored accounts, 287 alerts and 413 findings at cutoff `2022-09-02T12:00:00Z`. These are snapshot counts, not hardcoded UI values or confirmed crime counts. See [frontend validation](../../frontend_validation.md), [account view](../account_investigation/README.md) and [network view](../network_investigation/README.md).
+The retained HI-Small snapshot contains 279 scored accounts, 287 alerts and 413 findings at cutoff `2022-09-02T12:00:00Z`. These are snapshot counts, not hardcoded UI values or confirmed crime counts. See [frontend validation](../../frontend_validation.md), [account view](../account_investigation/README.md) and [network view](../network_investigation/README.md).
+
+
+## Case, report and replay workspace
+
+Cases supports explicit creation from selected snapshot alerts, notes/corrections, assignment, evidence attachment, version-checked state changes, required close dispositions and audited reopen. Current workflow and immutable historical versions are separately accessible. Reports exports either the selected analysis alerts or an explicit case version, with source verification and local ZIP download. Replay starts/continues one historical cutoff per explicit action, shows durable progress and exposes frozen per-cutoff alert summaries in an isolated store. Browsing these pages creates no cases, exports or replay runs.
+
+See the [case contract](../cases/README.md), [report contract](../reporting/README.md) and [replay contract](../replay/README.md) for APIs, limits, expected errors and CLI commands. Benchmark evaluation, independent verified profiles and full-history account querying remain unavailable.
