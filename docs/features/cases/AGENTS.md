@@ -1,7 +1,7 @@
 # Case management and audit contract instructions
 
 ## Purpose
-Maintain the authoritative contract in `README.md` for `src/fintrace/cases/`. Implementation is pending.
+Maintain the authoritative contract in `README.md` for `src/fintrace/cases/`. The local service, CLI and workspace integration are implemented.
 
 ## Inputs
 - Selected alerts/evidence snapshots, analyst notes, assignment and explicit actions.

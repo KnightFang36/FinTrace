@@ -1,1 +1,1 @@
-"""Local alert persistence is implemented; general case/replay repositories remain pending."""
+"""Local audited alert and versioned case persistence; replay checkpoints are owned by replay.engine."""
