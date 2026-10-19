@@ -48,6 +48,8 @@ def _schemas():
         "quarantine": pa.schema(common + [
             ("financial_fields_json", pa.string()),
             ("issue_codes", pa.list_(pa.string())), ("messages", pa.list_(pa.string())),
+            # Unexpected source columns beyond the label stay diagnosable; the label never does.
+            ("unexpected_trailing_fields_json", pa.string()),
         ]),
         "labels": pa.schema(common + [("is_laundering", pa.int8())]),
         "label_issues": pa.schema(common + [("raw_label", pa.string()), ("code", pa.string())]),
@@ -172,7 +174,21 @@ def ingest_ibm(
     if target.exists():
         return _verify_completed(target, evaluation_target, manifest)
     lock = root / f".{dataset_id}.lock"
-    descriptor = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+    # A killed process cannot remove its lock, so a stale file must not block the
+    # documented recovery path with a bare FileExistsError.
+    if lock.exists() or lock.is_symlink():
+        raise ManifestError(
+            f"Ingest lock already exists: {lock}. "
+            "Confirm that no ingest is running, then delete this file and retry."
+        )
+    try:
+        descriptor = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+    except FileExistsError as error:
+        # Another process created the lock between the check and the open.
+        raise ManifestError(
+            f"Another ingest started for this dataset: {lock}. Wait for it to finish, or delete the "
+            "lock file after confirming no ingest is running."
+        ) from error
     os.close(descriptor)
     stage = None
     published_evaluation = False
@@ -223,11 +239,15 @@ def ingest_ibm(
                     ).hexdigest()
                     identity = {**common, "transaction_id": transaction_id, "source_record_number": number}
                     financial = row[:10]
+                    # Column 10 is the label and is never copied into a detection artifact.
+                    # Columns beyond it are unexpected source content; keep them for diagnosis.
+                    trailing = row[11:]
                     # Missing/invalid labels do not reject otherwise valid financial fields.
                     candidate = financial if len(row) in (10, 11) else []
                     validation = validate_transaction_fields(
                         candidate, timezone_policy=manifest["timezone_policy"],
                         timestamp_precision=manifest["timestamp_precision"],
+                        observed_field_count=len(row),
                     )
                     for issue in validation.issues:
                         issue_counts[f"{issue['severity']}:{issue['code']}"] += 1
@@ -245,6 +265,9 @@ def ingest_ibm(
                             **identity, "financial_fields_json": json.dumps(financial),
                             "issue_codes": [issue["code"] for issue in validation.issues],
                             "messages": [issue["message"] for issue in validation.issues],
+                            "unexpected_trailing_fields_json": (
+                                json.dumps(trailing) if trailing else None
+                            ),
                         })
                         counts["quarantined_records"] += 1
                     if len(row) == 11 and row[10] in ("0", "1"):

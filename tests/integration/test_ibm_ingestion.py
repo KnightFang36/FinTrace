@@ -61,6 +61,34 @@ class IbmIngestionTests(unittest.TestCase):
         self.assertEqual(len(json.loads(rejected[0]["financial_fields_json"])), 10)
         self.assertNotIn("is_laundering", rejected[0])
 
+    def test_unexpected_trailing_columns_are_quarantined_and_diagnosable(self):
+        """A widened source row must be diagnosable without ever copying the label column."""
+        self.prepare([self.normal("1") + ",EXTRA1,EXTRA2"])
+        ingest_ibm(self.manifest, self.raw, self.processed)
+        self.assertEqual(pq.read_table(self.dataset / "transactions.parquet").num_rows, 0)
+        rejected = pq.read_table(self.dataset / "quarantine.parquet").to_pylist()
+        self.assertEqual(len(rejected), 1)
+        self.assertEqual(rejected[0]["issue_codes"], ["field_count"])
+        self.assertIn("source row has 13", rejected[0]["messages"][0])
+        self.assertEqual(json.loads(rejected[0]["unexpected_trailing_fields_json"]), ["EXTRA1", "EXTRA2"])
+        self.assertEqual(len(json.loads(rejected[0]["financial_fields_json"])), 10)
+        # Column 10 is the label and must not appear anywhere in the detection artifact.
+        self.assertNotIn("is_laundering", rejected[0])
+        self.assertNotIn("EXTRA1", json.dumps(json.loads(rejected[0]["financial_fields_json"])))
+
+    def test_stale_ingest_lock_reports_actionable_error(self):
+        self.prepare([self.normal()])
+        manifest = json.loads(self.manifest.read_text())
+        lock = self.processed / f".{manifest['dataset_id']}.lock"
+        lock.parent.mkdir(parents=True, exist_ok=True)
+        lock.write_text("")
+        with self.assertRaisesRegex(ManifestError, "Ingest lock already exists") as caught:
+            ingest_ibm(self.manifest, self.raw, self.processed)
+        self.assertIn(str(lock), str(caught.exception))
+        self.assertIn("delete this file", str(caught.exception))
+        self.assertFalse(self.dataset.exists())
+        self.assertFalse(self.evaluation.exists())
+
     def test_invalid_or_missing_labels_do_not_reject_valid_financial_rows(self):
         self.prepare([self.normal("invalid"), self.normal().rsplit(",", 1)[0]])
         ingest_ibm(self.manifest, self.raw, self.processed)
