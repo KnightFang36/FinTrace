@@ -55,7 +55,7 @@ PNG views use a seeded layout and sorted node/edge prefix with separate display 
 - `network.png`: bounded relationship visualization.
 - `run.json`: dataset/cutoff/policy identity, input hashes, artifact hashes and summary counts.
 
-Existing artifacts are verified before reuse; changed or incomplete outputs fail instead of being overwritten. Rendering is headless; the command keeps its Matplotlib cache under ignored `.cache/`. Generated artifacts stay outside Git. The standalone rule CLI reports graph analysis as separately required rather than pretending it has run.
+Existing artifacts are verified before reuse; changed or incomplete outputs fail instead of being overwritten. A malformed `completion.json` inventory is reported by field, for example a `detection_artifacts` entry that is not an object or a missing required file, and the CLI exits with status 2 and no traceback. Rendering is headless; the command keeps its Matplotlib cache under ignored `.cache/`. Generated artifacts stay outside Git. The standalone rule CLI reports graph analysis as separately required rather than pretending it has run.
 
 ## Acceptance criteria
 

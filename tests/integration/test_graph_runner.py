@@ -70,3 +70,30 @@ def test_bad_source_rejected_before_graph_publication(prepared, tmp_path):
     with pytest.raises(ValueError, match="integrity"):
         run_graph_snapshot(prepared, ROOT / "config/graph.toml", "2022-09-01T03:00:00Z", tmp_path / "runs")
     assert not (tmp_path / "runs").exists()
+
+
+def test_malformed_completion_inventory_reports_clear_error(prepared, tmp_path):
+    """A corrupt completion marker is a data problem, not a traceback."""
+    completion = prepared.parent / "completion.json"
+    marker = json.loads(completion.read_text())
+    marker["detection_artifacts"] = ["transactions.parquet", "quality.json"]
+    completion.write_text(json.dumps(marker))
+    with pytest.raises(ValueError, match="detection_artifacts\\[0\\]"):
+        run_graph_snapshot(prepared, ROOT / "config/graph.toml", "2022-09-01T03:00:00Z", tmp_path / "runs")
+    command = [sys.executable, str(ROOT / "scripts/run_graphs.py"), str(prepared),
+               "--cutoff", "2022-09-01T03:00:00Z", "--output-root", str(tmp_path / "runs")]
+    result = subprocess.run(command, capture_output=True, text=True)
+    assert result.returncode == 2
+    assert "Traceback" not in result.stderr
+    assert "detection_artifacts" in result.stderr
+    assert not (tmp_path / "runs").exists()
+
+
+def test_completion_inventory_missing_required_file_is_reported(prepared, tmp_path):
+    completion = prepared.parent / "completion.json"
+    marker = json.loads(completion.read_text())
+    marker["detection_artifacts"] = [item for item in marker["detection_artifacts"]
+                                     if item["file"] != "quality.json"]
+    completion.write_text(json.dumps(marker))
+    with pytest.raises(ValueError, match="omits required file"):
+        run_graph_snapshot(prepared, ROOT / "config/graph.toml", "2022-09-01T03:00:00Z", tmp_path / "runs")
