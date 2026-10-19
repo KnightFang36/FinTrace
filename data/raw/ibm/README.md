@@ -1,6 +1,6 @@
 # IBM synthetic transaction sources
 
-Expected local input: HI-Small_Trans.csv from the publisher-linked distribution. Actual datasets stay local and are not tracked by Git. Optional uploads may include HI-Small_accounts.csv and Pattern.txt.
+Expected local input: an IBM transaction CSV such as HI-Small_Trans.csv or HI-Medium_Trans.csv from the publisher-linked distribution. Actual datasets stay local and are not tracked by Git. Optional uploads may include the corresponding publisher accounts CSV and pattern text. Keep variant-specific manifests and audits; see the [HI-Medium workflow](../../README.md#selecting-hi-medium).
 
 The provenance tool requires this exact ordered header, including duplicate Account fields:
 

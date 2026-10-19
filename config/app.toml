@@ -1,7 +1,7 @@
 # Illustrative configuration; application services are not implemented yet.
 schema_version = "1"
 [dataset]
-variant = "HI-Small"
+variant = "HI-Medium"
 raw_directory = "data/raw/ibm"
 processed_directory = "data/processed"
 # Required before ingestion: no inferred timezone.

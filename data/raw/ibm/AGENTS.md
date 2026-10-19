@@ -4,7 +4,7 @@
 Hold locally acquired IBM synthetic AML source files.
 
 ## Inputs
-HI-Small transaction CSV, acquisition manifest and optional publisher pattern annotations.
+IBM transaction CSV (including HI-Small and HI-Medium), acquisition manifest, optional publisher accounts and evaluation-only pattern annotations.
 
 ## Outputs
 Verified source file references consumed by ingestion; pattern annotations consumed only by evaluation.

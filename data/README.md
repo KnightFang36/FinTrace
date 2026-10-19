@@ -1,6 +1,6 @@
 # Data foundation
 
-This folder separates immutable IBM source files, generated analysis artifacts, and optional verified references. **Provenance, upload auditing and transaction normalization are implemented; detection remains pending. Source datasets are local and excluded from Git.**
+This folder separates immutable IBM source files, generated analysis artifacts, and optional verified references. **Provenance, upload auditing and transaction normalization are implemented. Deterministic detection, graphs, priorities and alerts run separately against completed detection artifacts. Source datasets are local and excluded from Git.**
 
 | Location | Input | Output / responsibility |
 | --- | --- | --- |
@@ -66,7 +66,7 @@ python3 -m venv .venv
 
 Detection-facing artifacts are transactions.parquet, accounts.parquet, quarantine.parquet and quality.json under data/processed/datasets/<dataset_id>/. Benchmark labels, label errors and their own quality report are isolated under data/processed/evaluation/<dataset_id>/. No label or pattern annotation is supplied to financial validation or account derivation. An invalid benchmark label does not reject valid financial fields.
 
-The adapter uses bounded batches, exact decimal(38,8) values, stable source-record IDs, per-dataset locks and staged completion markers. Duplicate-content payments remain distinct and are counted in diagnostics. Repeating an import verifies sources and artifact hashes before returning a reused result. Observed account keys preserve both bank and account source strings. Publisher entity tables are not implicitly joined.
+The adapter uses bounded batches, exact decimal(38,8) values, stable source-record IDs, per-dataset locks and staged completion markers. Above 250,000 accepted rows, account and duplicate diagnostics use 32 temporary hash partitions within the existing 512 MB DuckDB budget. Duplicate-content payments remain distinct and are counted in diagnostics. Repeating an import verifies sources and artifact hashes before returning a reused result. Observed account keys preserve both bank and account source strings. Publisher entity tables are not implicitly joined.
 
 The ingest command requires PyArrow and DuckDB. Audit/create/verify use only the standard library. A malformed CSV stream aborts publication; field-level financial errors go to quarantine. Historical eligibility remains unknown without independently declared coverage.
 
@@ -82,6 +82,32 @@ After normalization, inventory the supplied synthetic entity table separately:
 Outputs under data/processed/supplemental/<snapshot_id>/ include publisher_accounts.parquet, account_link_candidates.parquet, quarantine.jsonl and completion.json. Synthetic entity names/IDs come directly from the supplied file. They are source metadata, not independently verified KYC or source-of-wealth information.
 
 Link statuses are exact_source_key, zero_padding_candidate, ambiguous and unmatched. Numeric leading-zero equivalence is diagnostic only, with both source bank IDs retained; no link is automatically applied to detection account keys. Candidate conflicts remain explicit. Repeated runs verify and reuse completed snapshots. Patterns are not an input to this operation.
+
+## Selecting HI-Medium
+
+HI-Medium uses the same financial schema and ingestion services as HI-Small. Keep it as a separate dataset rather than appending it to HI-Small: a larger variant does not establish that it is a disjoint extension. Retain the earlier dataset and alert history. Source files and generated artifacts remain local and ignored by Git.
+
+For the user-supplied files, keep the original CSV names and preserve the pasted pattern text as `data/raw/ibm/HI-Medium_Pattern.txt`. Use distinct provenance/audit files:
+
+```bash
+.venv/bin/python scripts/prepare_data.py audit \
+  --transactions HI-Medium_Trans.csv --accounts HI-Medium_accounts.csv \
+  --patterns HI-Medium_Pattern.txt --output data/raw/ibm/upload-audit-hi-medium.json
+
+.venv/bin/python scripts/prepare_data.py create data/raw/ibm/HI-Medium_Trans.csv \
+  --variant HI-Medium --timezone UTC --timezone-basis project_convention \
+  --timestamp-precision minute \
+  --source-terms 'Publisher repository declares CDLA-Sharing-1.0; local files supplied by user; acquisition-specific terms not provided.' \
+  --output data/raw/ibm/manifest-hi-medium.json
+
+.venv/bin/python scripts/prepare_data.py ingest data/raw/ibm/manifest-hi-medium.json
+
+.venv/bin/python scripts/prepare_data.py accounts \
+  data/processed/datasets/REPLACE_WITH_MEDIUM_DATASET_ID/accounts.parquet \
+  --source HI-Medium_accounts.csv
+```
+
+UTC retains the earlier explicit project convention; it is not a publisher timezone claim. Acquisition time and historical coverage remain unknown. Existing audit/manifest destinations are immutable: reuse them with verify/ingest rather than rerunning creation. Supply only the completed HI-Medium detection Parquet to the existing rule/graph commands, then import those completed runs into the local alert store. Pattern text and labels remain evaluation-only; pattern matching and benchmark measurements are still pending. Detection windows, currency separation, evidence budgets, scoring weights and graph limits are unchanged. A snapshot exceeding a budget must use an explicit smaller scope, never silently sample or raise limits merely to force a result.
 
 ## Historical coverage
 
