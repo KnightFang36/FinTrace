@@ -22,6 +22,41 @@ def _hash(path):
     return digest.hexdigest()
 
 
+def _detection_inventory(completion):
+    """Read the completion marker's artifact digest map, or fail with a clear reason.
+
+    A malformed marker is a corrupt or hand-edited artifact, not a caller mistake.
+    Name the field and the required shape instead of letting a TypeError escape.
+    """
+    artifacts = completion.get("detection_artifacts")
+    if not isinstance(artifacts, list) or not artifacts:
+        raise ValueError(
+            "completion.json must list detection_artifacts as a non-empty array of "
+            "{file, sha256} objects"
+        )
+    inventory = {}
+    for index, item in enumerate(artifacts):
+        if not isinstance(item, dict) or set(item) != {"file", "sha256"}:
+            raise ValueError(
+                f"completion.json detection_artifacts[{index}] must be an object with exactly "
+                "file and sha256"
+            )
+        if not isinstance(item["file"], str) or not isinstance(item["sha256"], str):
+            raise ValueError(
+                f"completion.json detection_artifacts[{index}] file and sha256 must be strings"
+            )
+        if item["file"] in inventory:
+            raise ValueError(f"completion.json lists {item['file']} more than once")
+        inventory[item["file"]] = item["sha256"]
+    missing = {"transactions.parquet", "quality.json"} - set(inventory)
+    if missing:
+        raise ValueError(
+            "completion.json detection_artifacts omits required file(s): "
+            + ", ".join(sorted(missing))
+        )
+    return inventory
+
+
 def load_detection_snapshot(transactions_path, cutoff, *, start=None, max_records, subject_accounts=()):
     """Run one explicit cutoff, never opening labels or pattern annotations."""
     import pyarrow as pa
@@ -40,7 +75,7 @@ def load_detection_snapshot(transactions_path, cutoff, *, start=None, max_record
     completion = json.loads(completion_path.read_text())
     if not isinstance(completion, dict) or completion.get("status") != "completed":
         raise ValueError("Input dataset is not complete")
-    inventory = {item["file"]: item["sha256"] for item in completion["detection_artifacts"]}
+    inventory = _detection_inventory(completion)
     hashes = {}
     for name in ("transactions.parquet", "quality.json"):
         actual = _hash(parent / name)
@@ -53,7 +88,7 @@ def load_detection_snapshot(transactions_path, cutoff, *, start=None, max_record
     quality = json.loads(quality_path.read_text())
     if not isinstance(quality, dict):
         raise ValueError("Invalid dataset quality metadata")
-    if quality["dataset_id"] != completion["dataset_id"]:
+    if quality.get("dataset_id") != completion.get("dataset_id"):
         raise ValueError("Conflicting input dataset identities")
     cutoff = utc_instant(cutoff)
     subjects = tuple(sorted(set(

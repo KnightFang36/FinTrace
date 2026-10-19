@@ -26,7 +26,7 @@ def main(argv=None):
     except ImportError as error:
         print(f"Graph dependencies unavailable: {error}. Install config/data-requirements.txt", file=sys.stderr)
         return 2
-    except (ValueError, OSError, KeyError) as error:
+    except (ValueError, OSError, KeyError, TypeError) as error:
         print(f"Graph analysis failed: {error}", file=sys.stderr)
         return 2
     print(json.dumps(result, indent=2, sort_keys=True))

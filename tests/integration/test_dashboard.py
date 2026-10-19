@@ -8,7 +8,7 @@ import pytest
 from streamlit.testing.v1 import AppTest
 
 from fintrace.contracts import AccountKey, Finding
-from fintrace.investigations.dashboard import list_snapshots, load_dashboard, filter_alerts
+from fintrace.investigations.dashboard import filter_alerts, list_snapshots, load_dashboard, load_graph_evidence
 from fintrace.scoring.priority import load_scoring_policy, score_accounts
 from fintrace.storage.alert_store import AlertStore
 
@@ -104,3 +104,14 @@ def test_empty_workspace_never_creates_database(tmp_path, monkeypatch):
     assert not at.metric
     assert any("No alert store found" in item.value for item in at.info)
     assert not missing.exists()
+
+
+def test_missing_graph_artifacts_raise_actionable_value_error(tmp_path, workspace):
+    """A pruned or foreign processed root must not surface a raw OSError."""
+    path, snapshot, _ = workspace
+    model = load_dashboard(path, snapshot["snapshot_id"])
+    model["snapshot"]["coverage"]["temporal_graphs"] = {
+        "status": "evaluated", "run_id": "graphs-" + "a" * 64,
+    }
+    with pytest.raises(ValueError, match="Graph run artifacts are missing"):
+        load_graph_evidence(tmp_path / "empty-root", model)

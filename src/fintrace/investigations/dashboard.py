@@ -108,7 +108,13 @@ def load_graph_evidence(processed_root, model):
     ):
         raise ValueError("Invalid graph run identity")
     path = Path(processed_root) / "graph_runs" / identifier
-    if (path / "graph.json").stat().st_size > 250 * 1024 * 1024:
+    artifact = path / "graph.json"
+    if artifact.is_symlink() or not artifact.is_file():
+        raise ValueError(
+            "Graph run artifacts are missing under the processed root. Re-run scripts/run_graphs.py "
+            "for this snapshot, or clear FINTRACE_PROCESSED_ROOT if it points at another machine."
+        )
+    if artifact.stat().st_size > 250 * 1024 * 1024:
         raise ValueError("Graph artifact exceeds dashboard loading budget")
     graph, marker = load_analysis_run(path, "graphs")
     datasets = {item["dataset_id"] for item in model["priorities"].values()}
