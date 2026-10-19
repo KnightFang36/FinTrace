@@ -21,6 +21,11 @@ Streamlit AppTest exercised all four routes. Headless Chromium loaded the actual
 
 The earlier HI-Small frontend check passed with 142 tests and 31 subtests; the latest suite count is recorded above. Structural/documentation checks run separately. Runtime frontend versions are pinned in `config/frontend-requirements.txt`; browser tooling is optional and excluded from runtime pins.
 
-Limits remain explicit: snapshot-only investigation, graph-window totals, current rather than historical workflow status, bounded catalog/tables/graph, and no verified customer context. The local app has no authentication or public deployment configuration. Case workflows, general report exports, benchmark evaluation and replay remain pending. Selected finding JSON downloads are evidence copies, not regulatory reports.
+Limits remain explicit: snapshot-only investigation, graph-window totals, current rather than historical workflow status, bounded catalog/tables/graph, and no verified customer context. The local app has no authentication or public deployment configuration. Versioned cases, verified local reports and checkpointed replay are implemented on separate pages; benchmark evaluation remains pending. Selected finding JSON downloads are evidence copies, not regulatory reports.
 
 Start with `.venv/bin/python -m streamlit run app/streamlit_app.py` after following [the dashboard setup](features/dashboard/README.md).
+
+
+## Case, report and replay extension
+
+The seven-page workspace now includes versioned case management, verified local report downloads and isolated historical replay with progress/resume. The full suite passed 171 tests and 46 subtests. New Streamlit fixture checks cover explicit case creation, report generation, replay start/continue and no repeated writes on rerender. Headless Chrome verified the three new pages and mobile layout without JavaScript errors; browser checks submitted no analyst actions. See [workflow service verification](workflow_services_validation.md) for source resolution, export safety, checkpoint recovery and measured HI-Medium checks. Earlier counts above describe the initial four-page verification.
