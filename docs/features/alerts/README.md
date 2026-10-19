@@ -1,6 +1,6 @@
 # Alert generation and lifecycle
 
-**Status: local deduplication, audited lifecycle, transactional persistence, CLI and Streamlit alert review implemented.** The [investigation dashboard](../dashboard/README.md) provides explicit version-checked review transitions. Case linking and general report exports remain pending; regulatory submission is excluded. Owners: `src/fintrace/alerts/` and `src/fintrace/storage/alert_store.py`.
+**Status: local deduplication, audited lifecycle, transactional persistence, CLI and Streamlit alert review implemented.** The [investigation dashboard](../dashboard/README.md) provides explicit version-checked review transitions. Cases can retain frozen alert attachments and local reports can export their verified evidence; regulatory submission is excluded. Owners: `src/fintrace/alerts/` and `src/fintrace/storage/alert_store.py`.
 
 ## Implemented interfaces
 

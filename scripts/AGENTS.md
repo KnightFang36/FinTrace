@@ -19,7 +19,7 @@ The prepare_data.py audit command inventories uploaded transactions/accounts/pat
 
 ingest creates label-isolated Parquet datasets from a verified manifest; accounts preserves synthetic publisher records and explicit review-only links. Both require the pinned data environment. Keep source values, metadata assumptions, quarantine and completion integrity visible; no routine source artifacts belong in commits.
 
-No silent network access, credential prompts, source modification or invented runnable commands. A scaffold check is not a detection-system test.
+manage_cases.py applies explicit idempotent, version-checked case actions and reads historical versions. export_reports.py publishes verified local evidence artifacts from a snapshot or case version. run_replay.py runs a bounded cutoff schedule into an isolated alert store and resumes a verified checkpoint. No silent network access, credential prompts, source modification or invented runnable commands. A scaffold check is not a detection-system test.
 
 run_graphs.py delegates to graph.runner, publishing verified graph JSON and a bounded headless PNG. --seed restricts chain/cycle origins while groups and descriptive context retain full loaded-window scope.
 

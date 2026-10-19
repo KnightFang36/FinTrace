@@ -1,6 +1,6 @@
 # Implementation roadmap
 
-Data preparation and phase-2 deterministic transaction rules are implemented. Six core rules produce traceable evidence and explicit feature coverage through a bounded cutoff-snapshot CLI. Phase 3 temporal NetworkX analysis is implemented with a separate verified snapshot CLI and bounded PNG views. Phase 4 fixed-policy priority and transactional audited alerts is implemented. Phases 5 and 6 are partially implemented: snapshot account/network investigation and the four-page Streamlit workspace work; cases, full-history account queries and general report exports remain pending.
+Data preparation and phase-2 deterministic transaction rules are implemented. Six core rules produce traceable evidence and explicit feature coverage through a bounded cutoff-snapshot CLI. Phase 3 temporal NetworkX analysis is implemented with a separate verified snapshot CLI and bounded PNG views. Phase 4 fixed-policy priority and transactional audited alerts is implemented. Phases 5 and 6 include snapshot account/network investigation, versioned cases, verified local evidence exports and the seven-page workspace. Phase 7 historical cutoff replay/checkpoint resume is implemented. Full-history account queries, benchmark evaluation and optional context remain pending.
 
 | Phase | Deliverables | Completion evidence |
 | --- | --- | --- |
@@ -21,4 +21,4 @@ Timestamp interpretation, precision and coverage; feasible historical windows; v
 
 All policy defaults in `config/` are illustrative starting values, not validated detection performance or legal thresholds.
 
-Core Streamlit work is now implemented: overview, alert review, account evidence and bounded interactive network exploration. Phase 5 remains partial (no case workflow or full-history queries); phase 6 remains partial (no general report/case/evaluation/replay UI). The frontend renders actual service outputs and explicit review actions; it does not imply those remaining features are complete.
+The Streamlit workspace implements overview, alert review, account evidence, bounded network exploration, cases, local reports and historical replay. Full-history account queries, benchmark evaluation and optional verified context remain pending. Replay recomputes bounded historical cutoff snapshots; it is not a live banking connection.

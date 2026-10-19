@@ -1,6 +1,6 @@
 # Shared data contracts
 
-Source manifests, normalized transaction/account records, ingestion validation artifacts, core rule findings, feature coverage, RuleResult, temporal graph evidence, fixed-policy priorities and audited alerts are implemented. Case records, general report exports, replay checkpoints and benchmark measurements remain planned. Investigation read models expose existing snapshot evidence without fabricating these pending services.
+Source manifests, normalized transaction/account records, ingestion validation artifacts, core rule findings, feature coverage, RuleResult, temporal graph evidence, fixed-policy priorities and audited alerts are implemented. Versioned case records, general local report exports and replay checkpoints are implemented; benchmark measurements remain planned. Investigation read models expose existing snapshot evidence without fabricating these pending services.
 
 ## Common conventions
 - Identifiers are strings. Account keys contain separate `bank_id` and `account_id` components.
@@ -92,7 +92,7 @@ Fields: `alert_id`, `deduplication_key`, subject account/group, finding IDs, pri
 States: open -> in_review -> escalated or closed. Closed alerts require a reason; escalation is an internal workflow event. Repeated evidence appends an update event, not a silent replacement.
 
 ## Case and AuditEvent
-Case: `case_id`, title, alert IDs, linked accounts, status, assignee, notes, created/updated timestamps, evidence snapshot IDs, disposition and rationale.
+Case: `case_id`, `version`, `policy_version`, title, `state`, assignee, append-only notes, created/updated timestamps, hashed evidence snapshots with alert/finding/account references, and retained closure disposition/rationale.
 
 Case states: open -> investigating -> escalated or closed; an explicit audited reopen returns closed cases to investigating. Alert reopening is a separate explicit audited action returning it to open.
 
@@ -113,4 +113,11 @@ Checkpoint fields: replay ID, dataset/configuration identity, last processed eve
 
 Implemented graph snapshots use schema_version 1 and temporal-graphs-v1. graph.json includes edges with transaction IDs, findings, per-feature work/budget coverage, currency-specific context, source timestamp assumptions and visualization limits. Path/cycle transaction IDs remain chronological rather than sorted lexically. Seeds constrain origins only; group and metric scope is the entire loaded interval.
 
-Implemented priority schema 1 uses fixed-priority-v1 and hashes the complete ledger/policy/coverage. Implemented alert persistence uses DuckDB schema 1 with immutable findings and priority snapshots plus versioned append-only events. Incident keys include dataset, exact subject, family, alert-policy hash and final exclusive-window bucket. Alert first_observed_at/last_observed_at fields are analysis-window bounds, not exact transaction event times. No case workflow or verified customer context is implied.
+Implemented priority schema 1 uses fixed-priority-v1 and hashes the complete ledger/policy/coverage. Implemented alert persistence uses DuckDB schema 1 with immutable findings and priority snapshots plus versioned append-only events. Incident keys include dataset, exact subject, family, alert-policy hash and final exclusive-window bucket. Alert first_observed_at/last_observed_at fields are analysis-window bounds, not exact transaction event times. Versioned case workflow is implemented separately; no verified customer context is implied.
+
+
+Implemented case schema 1 (`case-workflow-v1`) stores current state, exact expected version, title, assignee, append-only notes, retained disposition, audit timestamps and hashed frozen evidence attachments. `ft_case_versions` and `ft_case_events` retain every successful version; `ft_case_requests` binds each request ID to its full action hash and original response. Unknown evidence, stale versions and invalid transitions roll back together.
+
+Implemented report schema 1 (`evidence-export-v1`) always retains evidence.json and a checksummed manifest, with optional transaction/finding CSV, escaped HTML and bounded PNG. The manifest records source and policy identities, coverage, filters, exact currency totals and visualization limits. Source lineage is retained in each transaction; missing/future evidence fails publication.
+
+Implemented replay schema 1 (`historical-replay-v1`) hashes source/policy identities, start/end/step schedule and atomic exclusive-cutoff tie policy into the replay ID. Checkpoints retain completed detector/priority IDs, their integrity references, watermark, cumulative available-record count, last source event key, audit context and local execution timings. Replay-local alerts commit before checkpoint advancement; repeats reuse immutable artifacts and idempotent imports. Changed source/policy bytes reject explicit resume.

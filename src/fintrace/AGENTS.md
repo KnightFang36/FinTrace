@@ -17,6 +17,6 @@ Do not expose placeholder APIs as working. Ingestion may extract benchmark label
 
 Graph engine owns chronological evidence; graph runner reuses the verified detection snapshot loader without account-edge filtering. Explicit seeds restrict path origins only. Optional reference exposure remains pending.
 
-scoring/priority.py owns fixed-family contributions. alerts/engine.py owns stable incidents and explicit lifecycle actions; alerts/runner.py verifies compatible frozen detector outputs. storage/alert_store.py transactionally retains immutable evidence/priority snapshots and append-only audit. General case persistence remains pending.
+scoring/priority.py owns fixed-family contributions. alerts/engine.py owns stable incidents and explicit lifecycle actions; alerts/runner.py verifies compatible frozen detector outputs. storage/alert_store.py transactionally retains immutable evidence/priority snapshots and append-only audit. storage/case_store.py retains immutable case versions, current state, idempotent requests and append-only audit events. cases/service.py owns explicit lifecycle actions.
 
-investigations/dashboard.py owns read-only snapshot catalogs, source-evidence projection and graph integrity gates. Frontend app/ only presents these read models and explicit action results.
+investigations/dashboard.py owns read-only snapshot catalogs, source-evidence projection and graph integrity gates. Frontend app/ only presents these read models and explicit action results. reporting/export.py resolves verified source transactions and publishes local reports atomically. replay/engine.py reuses the existing batch services at ordered cutoffs with isolated alerts and durable checkpoints.

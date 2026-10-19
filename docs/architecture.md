@@ -1,7 +1,7 @@
 # Architecture
 
 ## Status and execution boundary
-Data ingestion/validation and deterministic cutoff rule snapshots are implemented. Temporal graph analysis and bounded PNG rendering are implemented through scripts/run_graphs.py. Fixed-policy priorities and transactional alert persistence are implemented through scripts/manage_alerts.py. Snapshot-scoped account/network read models and the four-view Streamlit workspace are implemented. General orchestration, full-history investigation, case services and event replay remain pending. scripts/run_rules.py is the working rule CLI.
+Data ingestion/validation and deterministic cutoff rule snapshots are implemented. Temporal graph analysis and bounded PNG rendering are implemented through scripts/run_graphs.py. Fixed-policy priorities and transactional alert persistence are implemented through scripts/manage_alerts.py. Snapshot-scoped account/network read models and the seven-page Streamlit workspace are implemented. Case services use transactional version/audit storage; reports resolve verified financial rows and publish locally; historical cutoff replay uses isolated alerts and durable checkpoints. General orchestration, full-history account querying and benchmark evaluation remain pending. scripts/run_rules.py is the working rule CLI.
 
 ## Layers
 1. Ingestion verifies source headers and provenance; validation separates acceptable records from quarantine.

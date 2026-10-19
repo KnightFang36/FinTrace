@@ -1,7 +1,7 @@
 # Alert generation and lifecycle implementation instructions
 
 ## Purpose
-Own the source service described in `docs/features/alerts/README.md`. engine.py and runner.py implement local review incidents, verified imports and audited lifecycle; cases/UI remain pending.
+Own the source service described in `docs/features/alerts/README.md`. engine.py and runner.py implement local review incidents, verified imports and audited lifecycle; the Streamlit review UI is implemented, and cases retain frozen alert references through the separate case service.
 
 ## Inputs
 - Findings, priority snapshots, explicit grouping policy and persisted alert history.
