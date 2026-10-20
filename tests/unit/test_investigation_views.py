@@ -135,3 +135,20 @@ def test_six_hop_display_stops_at_depth_and_preserves_node_and_edge_budgets():
     assert len(bounded['nodes']) == 4 and len(bounded['edges']) == 2 and bounded['partial']
     with pytest.raises(ValueError, match='expansion'):
         get_network_view(graph, seed, hops=7)
+
+
+def test_layout_gives_nodes_clearance_and_edges_real_length_in_dense_groups():
+    import math
+    from app.components.network import network_positions
+    graph = {'edges': [edge(f'a{i}', 'A', f'X{i}') for i in range(24)] +
+                     [edge(f'b{i}', 'B', f'Y{i}') for i in range(12)]}
+    model = alerted_model([({'bank_id': '01', 'account_id': name}, 25, 'open') for name in ('A','B')])
+    from fintrace.investigations.network import get_alerted_network_view
+    view = get_alerted_network_view(graph, model)
+    positions = network_positions(view)
+    keys = sorted(positions)
+    assert all(math.dist(positions[left], positions[right]) >= 179.99
+               for index,left in enumerate(keys) for right in keys[index+1:])
+    assert all(math.dist(positions[item['from']], positions[item['to']]) >= 279.99
+               for item in view['edges'])
+    assert len(view['nodes']) == 38 and len(view['edges']) == 36
