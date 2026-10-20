@@ -181,6 +181,8 @@ def test_network_page_defaults_to_combined_alerted_accounts(workspace, monkeypat
         at.radio(key='navigation').set_value('Network explorer').run()
         assert not at.exception
         assert at.radio(key='network_view_mode').value == 'Top 10 alerted accounts'
+        assert next(widget for widget in at.slider if widget.label == 'Neighbourhood hops').value == 6
+        assert next(widget for widget in at.slider if widget.label == 'Account display limit').value == 100
         assert not any(widget.label == 'Seed account' for widget in at.selectbox)
         assert any('not confirmed mules' in item.value for item in at.caption)
         at.radio(key='network_view_mode').set_value('Single account').run()

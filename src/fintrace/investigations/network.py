@@ -4,12 +4,12 @@ import networkx as nx
 from fintrace.contracts import AccountKey, content_id
 
 
-def get_network_view(graph, seed, *, hops=1, direction="both", max_nodes=60, max_edges=150, finding=None):
+def get_network_view(graph, seed, *, hops=6, direction="both", max_nodes=100, max_edges=150, finding=None):
     return _network_view(graph, [seed], hops=hops, direction=direction, max_nodes=max_nodes,
                          max_edges=max_edges, finding=finding)
 
 
-def get_alerted_network_view(graph, model, *, hops=1, direction="both", max_nodes=40, max_edges=150):
+def get_alerted_network_view(graph, model, *, hops=6, direction="both", max_nodes=100, max_edges=150):
     """Top ten active-alert subjects by fixed-policy priority, with stable ties."""
     alerts = {}
     for alert in model['alerts']:
@@ -34,9 +34,9 @@ def get_alerted_network_view(graph, model, *, hops=1, direction="both", max_node
     return view
 
 
-def _network_view(graph, seeds, *, hops=1, direction="both", max_nodes=60, max_edges=150,
+def _network_view(graph, seeds, *, hops=6, direction="both", max_nodes=100, max_edges=150,
                   finding=None, include_missing=False):
-    if direction not in ("both", "incoming", "outgoing") or type(hops) is not int or not 1 <= hops <= 3:
+    if direction not in ("both", "incoming", "outgoing") or type(hops) is not int or not 1 <= hops <= 6:
         raise ValueError("Invalid network expansion")
     if type(max_nodes) is not int or not 1 <= max_nodes <= 200 or type(max_edges) is not int or not 1 <= max_edges <= 500:
         raise ValueError("Invalid network display budget")

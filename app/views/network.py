@@ -25,8 +25,8 @@ def render(model, get_graph):
         finding = st.selectbox("Highlight finding", findings, format_func=lambda item: "No highlight — neighbourhood only" if item is None else f"{humanize(item['rule_id'])} · {item['finding_id'][:12]}")
     a, b, c = st.columns(3)
     direction = a.selectbox("Direction", ["both", "incoming", "outgoing"], format_func=humanize)
-    hops = b.slider("Neighbourhood hops", 1, 3, 1)
-    max_nodes = c.slider("Account display limit", 10, 100, 40, step=10)
+    hops = b.slider("Neighbourhood hops", 1, 6, 6)
+    max_nodes = c.slider("Account display limit", 10, 100, 100, step=10)
     if mode == "Top 10 alerted accounts":
         view = get_alerted_network_view(graph, model, hops=hops, direction=direction, max_nodes=max_nodes, max_edges=150)
         st.caption("Ranked by fixed-policy review priority among open, in-review and escalated alerts. These are accounts for review, not confirmed mules. Orange nodes identify the ranked accounts; teal nodes are counterparties.")

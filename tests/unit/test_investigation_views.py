@@ -121,3 +121,17 @@ def test_graph_layout_positions_are_stable_across_input_order():
     reordered = {**view, 'nodes': list(reversed(view['nodes'])), 'edges': list(reversed(view['edges']))}
     assert first == positions(network_html(reordered))
     assert len(set(first.values())) == len(view['nodes'])
+
+
+def test_six_hop_display_stops_at_depth_and_preserves_node_and_edge_budgets():
+    import pytest
+    graph = {'edges': [edge(str(i), str(i), str(i+1)) for i in range(8)]}
+    seed = {'bank_id': '01', 'account_id': '0'}
+    view = get_network_view(graph, seed, direction='outgoing')
+    assert view['hops'] == 6 and view['limits']['max_nodes'] == 100
+    assert {node['account']['account_id'] for node in view['nodes']} == {str(i) for i in range(7)}
+    assert {item['id'] for item in view['edges']} == {str(i) for i in range(6)}
+    bounded = get_network_view(graph, seed, hops=6, direction='outgoing', max_nodes=4, max_edges=2)
+    assert len(bounded['nodes']) == 4 and len(bounded['edges']) == 2 and bounded['partial']
+    with pytest.raises(ValueError, match='expansion'):
+        get_network_view(graph, seed, hops=7)

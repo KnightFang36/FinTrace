@@ -233,3 +233,9 @@ Headless Chrome verified that the live default graph renders ten ranked subjects
 NetworkX now computes bounded node coordinates once with a fixed seed. Browser physics and dynamic edge simulation are disabled, preventing idle wobble while retaining manual dragging, panning, zoom and tooltips. The graph toolbar offers Full screen, Exit full screen and Fit graph; Escape exits the expanded view. Resizing and fitting preserve node coordinates.
 
 Eighteen focused investigation/UI tests passed, including input-order-independent coordinates. Headless Chrome verified unchanged idle positions, disabled physics, native full-screen enlargement from 1,140 × 560 to 1,600 × 1,052 pixels, fit without node movement, button/keyboard exit and no JavaScript errors. Structure/link checks passed. Screenshots remain ignored local artifacts. No financial data, detection policy or analyst records were modified.
+
+## Larger network defaults and transfer visibility
+
+The explorer and investigation services now default to six structural neighbourhood hops and up to 100 displayed accounts. The top ten active-alert subjects remain origins. The UI retains its 150-transfer limit; service hard caps remain 200 nodes/500 edges, with a six-hop maximum. Display size is a limit, not a promise to fabricate additional accounts in smaller neighbourhoods. Detector temporal-path policies and financial records are unchanged.
+
+Transfer strokes are three pixels wide, highlighted evidence is five pixels wide and arrowheads have scale factor 1.6. Nineteen focused tests passed, including six-hop boundary/budget checks and default UI values. Chrome verified the live HI-Medium default renders 100 accounts and 150 transfers, larger arrows, stable coordinates, full-screen/fit/exit/Escape controls and no JavaScript errors. Structure/link checks passed. The bounded-view notice continues to disclose omitted graph scope.

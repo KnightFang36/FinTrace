@@ -29,8 +29,8 @@ def network_html(view):
         tx = edge["transaction"]
         title = escape(f"{tx['transaction_id']} | {tx['occurred_at']} | Paid {tx['amount_paid']} {tx['payment_currency']} | Received {tx['amount_received']} {tx['receiving_currency']}")
         network.add_edge(edge["from"], edge["to"], id=content_id(edge["id"]), title=title,
-                         color="#ffbf69" if edge["highlighted"] else "#829cb8", width=3 if edge["highlighted"] else 1,
-                         arrows="to", smooth={"enabled": True, "type": "continuous"})
+                         color="#ffbf69" if edge["highlighted"] else "#829cb8", width=5 if edge["highlighted"] else 3,
+                         arrows={"to": {"enabled": True, "scaleFactor": 1.6}}, smooth={"enabled": True, "type": "continuous"})
     network.set_options(json.dumps({"layout": {"randomSeed": 42, "improvedLayout": False}, "physics": {"enabled": False},
                                    "interaction": {"hover": True, "navigationButtons": True}, "edges": {"arrows": {"to": {"enabled": True}}}}))
     html = network.generate_html()
