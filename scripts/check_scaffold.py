@@ -16,7 +16,7 @@ REQUIRED_DIRECTORIES = [
     "src/fintrace/rules", "src/fintrace/scoring", "src/fintrace/storage", "src/fintrace/validation",
     "tests", "tests/integration", "tests/unit",
 ]
-REQUIRED_DOCUMENTS = ["AGENTS.md", "README.md", "docs/architecture.md", "docs/data_contracts.md",
+REQUIRED_DOCUMENTS = ["README.md", "docs/architecture.md", "docs/data_contracts.md",
                       "docs/services.md", "docs/validation.md"]
 CODE_AND_DOC_ROOTS = ("app", "config", "docs", "scripts", "src", "tests")
 IGNORED_DIRECTORIES = {"__pycache__", ".pytest_cache", ".venv"}
@@ -36,12 +36,11 @@ def main() -> int:
     for relative in REQUIRED_DOCUMENTS:
         if not (ROOT / relative).is_file():
             errors.append(f"Missing document: {relative}")
-    # One project-wide instruction file and guide; no per-folder scaffolding.
+    # Keep one root guide; no per-folder README scaffolding.
     for relative in CODE_AND_DOC_ROOTS:
-        for name in ("AGENTS.md", "README.md"):
-            for path in (ROOT / relative).rglob(name):
-                if not any(part in IGNORED_DIRECTORIES for part in path.relative_to(ROOT).parts):
-                    errors.append(f"Redundant folder document: {path.relative_to(ROOT)}")
+        for path in (ROOT / relative).rglob("README.md"):
+            if not any(part in IGNORED_DIRECTORIES for part in path.relative_to(ROOT).parts):
+                errors.append(f"Redundant folder document: {path.relative_to(ROOT)}")
 
     python_files = [
         path for relative in ("app", "scripts", "src", "tests")
@@ -54,7 +53,7 @@ def main() -> int:
         except SyntaxError as error:
             errors.append(f"Python syntax: {path.relative_to(ROOT)}: {error}")
 
-    markdown_files = [ROOT / "README.md", ROOT / "AGENTS.md"]
+    markdown_files = [ROOT / "README.md"]
     for relative in CODE_AND_DOC_ROOTS:
         markdown_files.extend((ROOT / relative).rglob("*.md"))
     for path in markdown_files:

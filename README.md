@@ -66,7 +66,6 @@ python scripts/check_scaffold.py
 python -m pytest tests -q
 ```
 
-- [AGENTS.md](AGENTS.md): project-wide development instructions.
 - [Service contracts](docs/services.md): callable interfaces, inputs, outputs, limits and errors.
 - [Architecture](docs/architecture.md) and [data contracts](docs/data_contracts.md): service boundaries and record schemas.
 - [Local validation](docs/validation.md): measured dataset, dashboard and workflow verification.
